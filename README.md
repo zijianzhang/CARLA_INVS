@@ -3,7 +3,8 @@
  
  <img src="./fig/test2.png" width = "300" height = "200" alt="图片名称" align=center />
 
-![screenshot](./fig/test1.png) ![screenshot](./fig/test2.png)
+![screenshot](./fig/test1.png){:height="50%" width="50%"}
+![screenshot](./fig/test2.png)
 
 ## Feature
 - LiDAR/camera raw data collection in multi-agent synchronously
