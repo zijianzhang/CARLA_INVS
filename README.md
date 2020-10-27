@@ -17,7 +17,7 @@ python>=3.6, open3d>=0.10.0, CARLA >=0.9.8
      pip install -r requirement.txt
      ```
 ## Start
-run the following script in shell to look for vehicles spawn points. Like Fig.1
+run the following script in shell to look for vehicles spawn points as Fig.1.
 ```
 python Scenario.py spawn
 ```
@@ -30,10 +30,10 @@ run the following script in shell to transform raw data to KITTI format.
 ```
 python Process.py tmp/record2020_xxxx_xxxx
 ```
-run the following script in shell to view kitti Format data with open3D. Like Fig.2
+run the following script in shell to view kitti Format data with open3D as Fig.2.
 
 ```
-python Process.py tmp/record2020_xxxx_xxxx vehicle_id frame_id
+python Visualization.py tmp/record2020_xxxx_xxxx vehicle_id frame_id
 # The vehicle_id is the intelligent vehicle ID. The frame_ID is the index of dataset.
 ```
 
