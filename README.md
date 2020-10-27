@@ -1,8 +1,6 @@
 # Multi-agent Data Collection Scripts in CARLA Simulation 
- <img src="./fig/test1.png" width = "300" height = "200" alt="图片名称" align=center /><img src="./fig/test2.png" width = "300" height = "200" alt="图片名称" align=center />
+ <img src="./fig/test1.png" width = "300" alt="图片名称" align=center /><img src="./fig/test2.png" width = "300" alt="图片名称" align=center />
 
-![screenshot](./fig/test1.png){:height="50%" width="50%"}
-![screenshot](./fig/test2.png)
 
 ## Feature
 - LiDAR/camera raw data collection in multi-agent synchronously
@@ -43,10 +41,7 @@ run the following script in shell to view kitti Format data with open3D as Fig.2
 python Visualization.py tmp/record2020_xxxx_xxxx vehicle_id frame_id
 # The vehicle_id is the intelligent vehicle ID. The frame_ID is the index of dataset.
 ```
- 
-![screenshot](./fig/carla.png=100x100)
-![screenshot](./fig/fig2.png=100x100)
-![screenshot](./fig/fig3.png=100x100)
+  <img src="./fig/carla.png" width = "300" alt="图片名称" align=center /> <img src="./fig/fig2.png" width = "300" alt="图片名称" align=center /> <img src="./fig/fig3.png" width = "300" alt="图片名称" align=center />
 
 ## Raw Data Format
 
