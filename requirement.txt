@@ -1,0 +1,5 @@
+open3d>=0.11.1
+plyfile
+networkx                 
+notebook                 
+numpy                    
