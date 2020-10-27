@@ -41,7 +41,7 @@ run the following script in shell to view kitti Format data with open3D as Fig.2
 python Visualization.py tmp/record2020_xxxx_xxxx vehicle_id frame_id
 # The vehicle_id is the intelligent vehicle ID. The frame_ID is the index of dataset.
 ```
-  <img src="./fig/carla.png" width = "300" alt="图片名称" align=center /> <img src="./fig/fig2.png" width = "300" alt="图片名称" align=center /> <img src="./fig/fig3.png" width = "300" alt="图片名称" align=center />
+  <img src="./fig/carla.png" width = "250" alt="图片名称" align=center /> <img src="./fig/fig2.png" width = "250" alt="图片名称" align=center /> <img src="./fig/fig3.png" width = "250" alt="图片名称" align=center />
 
 ## Raw Data Format
 
