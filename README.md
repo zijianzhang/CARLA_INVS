@@ -4,7 +4,7 @@
 
 ## Feature
 - LiDAR/camera raw data collection in multi-agent synchronously
-- data format transformation to KITTI format
+- data transformation to KITTI format
 - data visualization with Open3d library
 
 
