@@ -42,9 +42,9 @@ python Visualization.py tmp/record2020_xxxx_xxxx vehicle_id frame_id
 # The vehicle_id is the intelligent vehicle ID. The frame_ID is the index of dataset.
 ```
  
-![screenshot](./fig/carla.png)
-![screenshot](./fig/fig1.png)
-![screenshot](./fig/fig2.png)
+![screenshot](./fig/carla.png=100x100)
+![screenshot](./fig/fig2.png=100x100)
+![screenshot](./fig/fig3.png=100x100)
 
 ## Raw Data Format
 
