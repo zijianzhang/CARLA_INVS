@@ -1,5 +1,5 @@
 # Multi-agent Data Collection Scripts in CARLA Simulation 
- <img src="./fig/test1.png" width = "500" alt="图片名称" align=center /><img src="./fig/test2.png" width = "500" alt="图片名称" align=center />
+ <img src="./fig/test2.png" width = "400" alt="图片名称" align=center /><img src="./fig/test1.png" width = "400" alt="图片名称" align=center />
 
 
 ## Feature
