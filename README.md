@@ -1,5 +1,6 @@
 # Multi-agent Data Collection Scripts in CARLA Simulation 
-![screenshot](./doc/pcd_label.png)
+![screenshot](./fig/test1.png) 
+![screenshot](./fig/test2.png)
 
 ## Feature
 - LiDAR/camera raw data collection in multi-agent synchronously
@@ -12,7 +13,11 @@
 python>=3.6, open3d>=0.10.0, CARLA >=0.9.8 
 
 ## Install
-1. install packages
+1. run the following command in the directory CARLA/PythonAPI/ 
+     ```
+     git clone git@github.com:zijianzhang/carla_scripts.git
+     ```
+2. enter the directory ./carla_scripts & install packages
      ```
      pip install -r requirement.txt
      ```
@@ -36,6 +41,10 @@ run the following script in shell to view kitti Format data with open3D as Fig.2
 python Visualization.py tmp/record2020_xxxx_xxxx vehicle_id frame_id
 # The vehicle_id is the intelligent vehicle ID. The frame_ID is the index of dataset.
 ```
+ 
+![screenshot](./fig/carla.png)
+![screenshot](./fig/fig1.png)
+![screenshot](./fig/fig2.png)
 
 ## Raw Data Format
 
