@@ -17,7 +17,7 @@ import carla
 import numpy as np
 import open3d as o3d
 import matplotlib.pyplot as plt
-from calibration import Calibration
+from utils.calibration import Calibration
 
 VIEW_WIDTH = 1242
 VIEW_HEIGHT = 375
