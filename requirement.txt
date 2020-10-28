@@ -1,5 +1,6 @@
-open3d>=0.11.1
+open3d>=0.10
 plyfile
 networkx                 
 notebook                 
-numpy                    
+numpy
+matplotlib
