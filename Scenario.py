@@ -190,8 +190,8 @@ class Map(object):
     def shuffle_spawn_points(self, spawn_points, start=False):
         # random.shuffle(spawn_points)
         if self.pretrain_model:
-            self.av_id = [4,5,27,20,97,22,14,77,47]
-            self.hd_id = [19,21,29,31,44,48,87,96] + [i for i in range(50,70)]
+            # self.av_id = [4,5,27,20,97,22,14,77,47]
+            # self.hd_id = [19,21,29,31,44,48,87,96] + [i for i in range(50,70)]
 
             cav = [spawn_points[i] for i in self.av_id]
             hd = [spawn_points[i] for i in self.hd_id]
