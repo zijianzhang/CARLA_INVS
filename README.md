@@ -17,7 +17,7 @@ python>=3.6, open3d>=0.10.0, CARLA >=0.9.8
 ## Install
 1. run the following command in the directory CARLA/PythonAPI/ 
      ```
-     git clone https://github.com/zijianzhang/carla_scripts.git
+     git clone https://github.com/zijianzhang/CARLA_INVS.git
      ```
 2. enter the directory ./carla_scripts & install packages
      ```
