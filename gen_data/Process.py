@@ -484,7 +484,11 @@ if __name__ == "__main__":
             else:
                 continue
     global_label_file_path = 'dataset/' + raw_data_path[4:] + '/img_list.txt'
-    frames = [frame[:-4] for frame in frames[frame_start:frame_end:frame_hz]]
+    frame_hz_alt = frame_hz #FIXME: for other imglist with higher frame_hz
+    frames = [frame[:-4] for frame in frames[frame_start:frame_end:frame_hz_alt]]
+    
+    # training: 0:510:3
+    # testing: 510:1100:1
     # if not os.path.exists(global_label_file_path):
     #     os.makedirs(global_label_file_path[:-13])
     np.savetxt(global_label_file_path, np.array(frames),fmt='%s', delimiter=' ')

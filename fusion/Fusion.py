@@ -594,7 +594,7 @@ def _read_imageset_file(path):
 if __name__ == "__main__":
     visualization_o3d = True
     one_frame = False
-    fusion_task = 'max'
+    fusion_task = 'dynamic'
     if one_frame:
         tmp_frame_id = '8202'
         tmp_vehicle_id = '590'
@@ -613,7 +613,7 @@ if __name__ == "__main__":
         task = sys.argv[3] #fusion method (pretrain, federated, distill)
     else:
         img_list = None
-    test_list_path = root_path #+ '/fed'
+    test_list_path = root_path
     test_list = [v for v in os.listdir(test_list_path) if 'vehicle' in v]
     print('vehicle numbers:',len(test_list))
     global_gt_path = root_path + '/global_label'
@@ -670,9 +670,11 @@ if __name__ == "__main__":
             cluster_data += ego_cluster_data
             if visualization_o3d:
                 geometry_list += ego_gt_bboxes #+ ego_bboxes
-        fusion_path = test_list_path+'/'+fusion_task+'/'+task +'_fusion_map'
-        fusion_global_path = test_list_path+'/'+fusion_task+'/'+task +'_fusion/global/'
+        fusion_path = test_list_path+'/'+fusion_task+'/'+task +'_fusion_map' #(debug) <task>_fusion_map
+        fusion_global_path = test_list_path+'/'+fusion_task+'/'+task +'_fusion/global/' #(label) <task>_fusion/global
         print(fusion_global_path)
+
+        
         if not os.path.exists(fusion_global_path):
             os.makedirs(fusion_global_path)
         fusion_list,global_vehicle_list,distill_flag = dbscan(cluster_data,vis,geometry_list,frame_id,fusion_path,fusion_task=fusion_task)
