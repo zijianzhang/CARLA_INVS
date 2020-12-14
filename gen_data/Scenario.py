@@ -63,7 +63,7 @@ class Args(object):
         self.fixed_delta_seconds = 0.05
 
         # map information
-        self.map_name = 'Town02' #['Town01' ... 'Town05'], https://carla.readthedocs.io/en/latest/core_map/#changing-the-map
+        self.map_name = TOWN_MAP
         self.spectator_point = [(100,150,150),(-60,90,0)]
         self.ROI = [[-140,-150],[-140, 140],[150, 140],[150, -150]]
         self.initial_spawn_ROI = [[-80,-70,0,100],
@@ -86,7 +86,8 @@ class Args(object):
         # record information
         self.sync = True
         self.time = time.strftime("%Y_%m%d_%H%M", time.localtime())
-        self.recorder_filename = os.getcwd() + '/' + 'log/record' + self.time + '.log'
+        self.recorder_filename = ( LOG_PATH / ('record'+self.time+'.log') ).as_posix()
+        # self.recorder_filename = os.getcwd() + '/' + 'log/record' + self.time + '.log'
         if argv:
             self.task = argv[1]
             if self.task == 'record' and len(argv) == 4:
@@ -512,9 +513,9 @@ class Scenario(object):
             else:
                 self.synchronous_master = False
                 print('synchronous_master is False.')
-        if not os.path.exists('log'):
-            os.mkdir('log')
-            print('mkdir log finished.')
+        # if not os.path.exists('log'):
+        #     os.mkdir('log')
+        #     print('mkdir log finished.')
         print("Recording on file: %s" % self.client.start_recorder(args.recorder_filename))
         self.agent_list = []
         self.sensor_relation = {}
