@@ -104,7 +104,8 @@ class Args(object):
         self.start = 0
         self.duration = 0
         # raw data information
-        self.raw_data_path = 'tmp/record' + self.time + '/'
+        self.raw_data_path = RAW_DATA_PATH / ('record'+self.time)
+        # self.raw_data_path = 'tmp/record' + self.time + '/'
         self.image_width = 1242
         self.image_height = 375
         self.VIEW_FOV = 90
@@ -290,9 +291,13 @@ class CAVcollect_Thread(Thread):
             self._camera_transforms[0],
             attach_to=self._parent)
             # attachment_type=self._c#amera_transforms[1])
-        filename = self.args.raw_data_path + \
-                    self._parent.type_id + '_' + str(self._parent.id) + '/' + \
-                    self.sensor.type_id + '_' + str(self.sensor.id)
+        filename = Path(self.args.raw_data_path,
+                        '%s_%d'%(self._parent.type_id, self._parent.id),
+                        '%s_%d'%(self.sensor.type_id, self.sensor.id)
+                    ).as_posix()
+        # filename = self.args.raw_data_path + \
+        #             self._parent.type_id + '_' + str(self._parent.id) + '/' + \
+        #             self.sensor.type_id + '_' + str(self.sensor.id)
         
         weak_self = weakref.ref(self)
         self.sensor.listen(lambda image: CAVcollect_Thread._parse_image(weak_self, image, filename))
@@ -377,10 +382,14 @@ class Scenario(object):
                 str_actor += [0,0,0] + [actor.parent.id]
                 sensors.append(str_actor)
         actors = np.array(vehicles + sensors)
-        if not os.path.exists(self.args.raw_data_path+'label'):
-            os.makedirs(self.args.raw_data_path+'label')
+        _label_path = Path(self.args.raw_data_path, 'label')
+        _label_path.mkdir(parents=True, exist_ok=True)
+        # if not os.path.exists(self.args.raw_data_path+'label'):
+        #     os.makedirs(self.args.raw_data_path+'label')
         if len(actors) != 0:
-            np.savetxt(self.args.raw_data_path + '/label/%010d.txt' % world_snapshot.frame, actors, fmt='%s', delimiter=' ')
+            _filename = ( _label_path / ('%010d.txt'%(world_snapshot.frame)) ).as_posix()
+            np.savetxt(_filename, actors, fmt='%s', delimiter=' ')
+            # np.savetxt(self.args.raw_data_path + '/label/%010d.txt' % world_snapshot.frame, actors, fmt='%s', delimiter=' ')
 
         # 2D bounding box
         vehicles = self.world.get_actors().filter('vehicle.*')
@@ -400,9 +409,13 @@ class Scenario(object):
                 if 'rgb' in sensor.type_id:
                     sensor.calibration = self.args.calibration
                     tmp_bboxes = ClientSideBoundingBoxes.get_bounding_boxes(vehicles,sensor)
-                    image_label_path = self.args.raw_data_path + \
-                                        vehicle.type_id + '_' + str(vehicle.id) + '/' + \
-                                        sensor.type_id + '_' + str(sensor.id)
+                    image_label_path = Path(self.args.raw_data_path,
+                                            vehicle.type_id + '_' + str(vehicle.id),
+                                            sensor.type_id + '_' + str(sensor.id)
+                                        ).as_posix()
+                    # image_label_path = self.args.raw_data_path + \
+                    #                     vehicle.type_id + '_' + str(vehicle.id) + '/' + \
+                    #                     sensor.type_id + '_' + str(sensor.id)
                     
                     if not os.path.exists(image_label_path+'_label'):
                         os.makedirs(image_label_path+'_label')
