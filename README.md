@@ -1,8 +1,8 @@
-the full version will be available after paper acceptance...
-
 # Distributed Dynamic Map Fusion in CARLA Simulation 
- <img src="./fig/test2.png" width = "400" alt="图片名称" align=center /><img src="./fig/test1.png" width = "400" alt="图片名称" align=center />
+> the full version will be available after paper acceptance...
 
+<img src="./fig/test2.png" width = "400" alt="图片名称" align=center />
+<img src="./fig/test1.png" width = "400" alt="图片名称" align=center />
 
 ## Feature
 - LiDAR/camera raw data collection in multi-agent synchronously
@@ -12,40 +12,62 @@ the full version will be available after paper acceptance...
 
 ## Requirements
 
-python>=3.6, open3d>=0.10.0, CARLA >=0.9.8 
+- Python3.6+
+- open3d >= 0.10.0
+- CARLA >= 0.9.8
+- `apt install libxerces-c-3.2 libjpeg8`
 
 ## Install
-1. run the following command in the directory CARLA/PythonAPI/ 
+1.  clone the repo
+
      ```
      git clone https://github.com/zijianzhang/CARLA_INVS.git
      ```
-2. enter the directory ./carla_scripts & install packages
+
+     > > remember change `CARLA_PATH` in `params.py`
+     >
+     > 1. 
+     >
+     > (suggest: `~/CARLA`)
+
+2. enter the directory `CARLA_INVS` & install packages
      ```
-     pip install -r requirement.txt
+     pip3 install -r requirement.txt
      ```
 ## Start
-run the following script in shell to look for vehicles spawn points as Fig.1.
-```
-python Scenario.py spawn
-```
-run the following script in shell to generate mulit-agent raw data. 
-```
-python Scenario.py record x1,x2 y1,y2
-# The x1,x2,y1,y2 are the spawn points ID.
-```
-run the following script in shell to transform raw data to KITTI format.
-```
-python Process.py tmp/record2020_xxxx_xxxx
-```
-run the following script in shell to view kitti Format data with open3D as Fig.2.
+1. start up `CarlaUE4.sh`, and run the following script in shell to look for vehicles spawn points as Fig.1.
 
-```
-python Visualization.py tmp/record2020_xxxx_xxxx vehicle_id frame_id
-# The vehicle_id is the intelligent vehicle ID. The frame_ID is the index of dataset.
-```
-  <img src="./fig/carla.png" width = "250" height = "250"  alt="图片名称" align=center /> <img src="./fig/fig2.png" width = "250" alt="图片名称" align=center /> <img src="./fig/fig3.png" width = "250" alt="图片名称" align=center />
+   ```
+   python3 Scenario.py spawn
+   ```
 
-## Raw Data Format
+   <img src="./fig/carla.png" width = "250" height = "250"  alt="图片名称" align=center /> <img src="./fig/fig2.png" width = "250" alt="图片名称" align=center />
+
+2. run the following script in shell to generate mulit-agent raw data. 
+
+   ```bash
+   python3 Scenario.py record x1,x2 y1,y2
+   # The x1,x2,y1,y2 are the spawn points ID.
+   ```
+
+   where $\mathbf{x}=[x_1,...,x_N]$ for *human-driven vehicles*, $\mathbf{y}=[y_1,...,y_M]$ for *autonomous vehicles*.
+
+3. run the following script in shell to transform raw data to KITTI format.
+
+   ```bash
+   python3 Process.py tmp/record2020_xxxx_xxxx
+   ```
+
+4. (Optional) run the following script in shell to view kitti Format data with Open3D as follows.
+
+   ```bash
+   python3 Visualization.py dataset/record2020_xxxx_xxxx vehicle_id frame_id
+   # The vehicle_id is the intelligent vehicle ID. The frame_ID is the index of dataset.
+   ```
+
+<img src="./fig/fig3.png" width = "250" alt="图片名称" align=center />
+
+### Raw Data Format
 
 ````
 tmp
@@ -66,7 +88,7 @@ tmp
 
 label is the directory to save the tmp labels.
 
-## KITTI Format
+### KITTI Format
 
 ````
 dataset

@@ -2,14 +2,18 @@ import os
 import sys
 import time
 import glob
+from pathlib import Path
+from params import CARLA_PATH
 
 try:
-    sys.path.append(glob.glob('../carla/dist/carla-*%d.%d-%s.egg' % (
+    _egg_file = sorted(Path(CARLA_PATH, 'PythonAPI/carla/dist').expanduser().glob('carla-*%d.*-%s.egg'%(
         sys.version_info.major,
-        sys.version_info.minor,
-        'win-amd64' if os.name == 'nt' else 'linux-x86_64'))[0])
+        'win-amd64' if os.name == 'nt' else 'linux-x86_64'
+    )))[0].as_posix()
+    sys.path.append(_egg_file)
 except IndexError:
-    pass
+    print('CARLA Egg File Not Found.')
+    exit()
 
 import carla
 import random
@@ -34,10 +38,8 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
 try:
-    path = os.getcwd()
-    sys.path.append( path+'/../carla' )
-    sys.path.append( path+'/PythonAPI/examples' )
-    # print(sys.path)
+    sys.path.append(Path(CARLA_PATH, 'PythonAPI/carla').expanduser().as_posix() )
+    sys.path.append(Path(CARLA_PATH, 'PythonAPI/examples').expanduser() )
 except IndexError:
     pass
 
@@ -84,8 +86,8 @@ class Args(object):
         if argv:
             self.task = argv[1]
             if self.task == 'record' and len(argv) == 4:
-                self.hd_id = [int(id) for id in argv[2].split(',')]
-                self.av_id = [int(id) for id in argv[3].split(',')]
+                self.hd_id = [int(id) for id in argv[2].split(',')] #'hd' for 'human driver'
+                self.av_id = [int(id) for id in argv[3].split(',')] #'av' for 'autonomous vehicle'
             if len(argv) > 2 and self.task == 'replay':
                 self.recorder_filename = self.recorder_filename[:-13] + sys.argv[2] + '.log'
             elif len(argv) == 2 and self.task == 'replay':
@@ -446,7 +448,6 @@ class Scenario(object):
             tmpy.append(tmp_location.y)
         self.map.plot_points(tmpx,tmpy)
 
-
     def stop_look(self, args):
         print(args.sync)
         if args.sync:
@@ -460,7 +461,6 @@ class Scenario(object):
     def generate_data(self, args):
         self.recording_rawdata = True
         try:
-            # time.sleep(100)
             self.start_record(args)
             if not args.sync or not self.synchronous_master:
                 self.world.wait_for_tick()

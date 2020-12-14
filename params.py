@@ -1,0 +1,1 @@
+CARLA_PATH = '/media/lab1112/452eb1a1-1e32-427d-b310-d3f524d949a0/lab1112/CARLA' # Path('~/CARLA').expanduser()

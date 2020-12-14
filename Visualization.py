@@ -7,6 +7,7 @@ import numpy as np
 import open3d as o3d
 from utils.calibration import Calibration
 from utils.testo3d import get_strong
+
 def get_fov_flag(pts_rect, img_shape, calib):
     '''
     Valid point should be in the image (and in the PC_AREA_SCOPE)

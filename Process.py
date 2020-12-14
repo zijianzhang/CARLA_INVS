@@ -4,15 +4,19 @@ import copy
 import math
 import shutil
 import glob
-
+from pathlib import Path
+from params import CARLA_PATH
 
 try:
-    sys.path.append(glob.glob('../carla/dist/carla-*%d.%d-%s.egg' % (
+    _egg_file = sorted(Path(CARLA_PATH, 'PythonAPI/carla/dist').expanduser().glob('carla-*%d.*-%s.egg'%(
         sys.version_info.major,
-        sys.version_info.minor,
-        'win-amd64' if os.name == 'nt' else 'linux-x86_64'))[0])
+        'win-amd64' if os.name == 'nt' else 'linux-x86_64'
+    )))[0].as_posix()
+    sys.path.append(_egg_file)
 except IndexError:
-    pass
+    print('CARLA Egg File Not Found.')
+    exit()
+
 import carla
 import numpy as np
 import open3d as o3d
