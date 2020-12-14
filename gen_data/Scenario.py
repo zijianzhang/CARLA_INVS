@@ -1,9 +1,13 @@
+#!/usr/bin/env python3
 import os
 import sys
 import time
 import glob
+# amend relative import
 from pathlib import Path
-from params import CARLA_PATH
+sys.path.append( Path(__file__).resolve().parent.parent.as_posix() ) #repo path
+sys.path.append( Path(__file__).resolve().parent.as_posix() ) #file path
+from params import *
 
 try:
     _egg_file = sorted(Path(CARLA_PATH, 'PythonAPI/carla/dist').expanduser().glob('carla-*%d.*-%s.egg'%(
