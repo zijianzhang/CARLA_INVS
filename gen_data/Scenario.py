@@ -59,7 +59,7 @@ class Args(object):
         self.fixed_delta_seconds = 0.05
 
         # map information
-        self.map_name = 'Town02'
+        self.map_name = 'Town02' #['Town01' ... 'Town05'], https://carla.readthedocs.io/en/latest/core_map/#changing-the-map
         self.spectator_point = [(100,150,150),(-60,90,0)]
         self.ROI = [[-140,-150],[-140, 140],[150, 140],[150, -150]]
         self.initial_spawn_ROI = [[-80,-70,0,100],
