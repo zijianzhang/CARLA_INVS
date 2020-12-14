@@ -1,5 +1,5 @@
 open3d>=0.10
-plyfile                 
-notebook                 
+plyfile
+notebook
 numpy
 matplotlib

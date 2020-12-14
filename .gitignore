@@ -1,5 +1,9 @@
 .vscode
 __pycache__
+# for gen_data
 log
 tmp
 dataset
+# for training
+model
+PCDET/tools/cfgs/*.yaml

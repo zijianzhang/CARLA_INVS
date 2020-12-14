@@ -1,14 +1,13 @@
 # Distributed Dynamic Map Fusion in CARLA Simulation 
 > the full version will be available after paper acceptance...
 
-<img src="./fig/test2.png" width = "400" alt="图片名称" align=center />
-<img src="./fig/test1.png" width = "400" alt="图片名称" align=center />
+<img src="./preview/test2.png" width = "400" alt="图片名称" align=center />
+<img src="./preview/test1.png" width = "400" alt="图片名称" align=center />
 
 ## Feature
 - LiDAR/camera raw data collection in multi-agent synchronously
 - data transformation to KITTI format
 - data visualization with Open3d library
-
 
 ## Requirements
 
@@ -34,6 +33,7 @@
      ```
      pip3 install -r requirement.txt
      ```
+
 ## Start
 1. start up `CarlaUE4.sh`, and run the following script in shell to look for vehicles spawn points as Fig.1.
 
@@ -41,7 +41,7 @@
    python3 Scenario.py spawn
    ```
 
-   <img src="./fig/carla.png" width = "250" height = "250"  alt="图片名称" align=center /> <img src="./fig/fig2.png" width = "250" alt="图片名称" align=center />
+   <img src="./preview/carla.png" width = "250" height = "250"  alt="图片名称" align=center /> <img src="./preview/fig2.png" width = "250" alt="图片名称" align=center />
 
 2. run the following script in shell to generate mulit-agent raw data. 
 
@@ -65,7 +65,7 @@
    # The vehicle_id is the intelligent vehicle ID. The frame_ID is the index of dataset.
    ```
 
-<img src="./fig/fig3.png" width = "250" alt="图片名称" align=center />
+<img src="./preview/fig3.png" width = "250" alt="图片名称" align=center />
 
 ### Raw Data Format
 
@@ -113,3 +113,12 @@ dataset
 label is the directory to save the ground truth labels.
 
 calib is the calibration matrix from point cloud to image.
+
+## Training Process
+- training for pre-trained model
+- training for federated model
+- online distill training
+
+## Testing Process
+- with fusion
+- without fusion
