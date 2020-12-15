@@ -1,16 +1,10 @@
 SHELL:=/bin/bash
-# MODEL_FILE := PartA2_car.pth
-# # MODEL_FILE := fed_aug1.pth
-# MODEL_FILE := FL5.pth
-MODEL_FILE := model1.pth
-# MODEL_FILE := model_fed_5iter.pth
-# MODEL_FILE := model_distill_5iter.pth
-CONFIG_FILE := cfgs/train2_new.yaml
 
+MODEL_FILE := model1.pth
+CONFIG_FILE := cfgs/train2_new.yaml
 # CONFIG_FILE:=cfgs/second.yaml
 # CONFIG_FILE := cfgs/carla.yaml
 # CONFIG_FILE:=cfgs/bear1.yaml
-
 BATCH_SIZE:=1
 
 all:install
@@ -21,12 +15,12 @@ install:install-spconv
 	python3 setup.py develop --user
 
 install-spconv:
-	@read -p 'Please ensure you have CUDA 9.0+ and cuDNN installed! (press ENTER to continue...)'
+	@echo -e '\nPlease ensure you have CUDA 9.0+ and cuDNN installed! (press ENTER to continue...)'; read -p ''
 
 	sudo apt install libboost-all-dev -y
-	sudo apt install llvm-10.0-dev -y; sudo ln -s /usr/bin/llvm-config-10 /usr/bin/llvm-config
+	# sudo apt install llvm-10.0-dev -y; sudo ln -s /usr/bin/llvm-config-10 /usr/bin/llvm-config
 	pip3 install cmake --user --upgrade
-	pip3 install "torch>=1.1,<1.4" --user
+	pip3 install "torch>=1.1,<=1.4" --user
 	
 	rm -rf build/spconv && git clone https://github.com/traveller59/spconv.git build/spconv --recursive
 	cd build/spconv; python3 setup.py bdist_wheel; cd ./dist; pip3 install *.whl --user

@@ -6,4 +6,5 @@ raw_data
 dataset
 # for training
 model
+PCDet/build
 PCDet/tools/cfgs/*.yaml

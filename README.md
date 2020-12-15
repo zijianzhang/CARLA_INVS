@@ -14,16 +14,16 @@
 - Python3.6+
 - open3d >= 0.10.0
 - CARLA >= 0.9.8
-- `apt install libxerces-c-3.2 libjpeg8`
 
 ## Install
+
 1.  clone the repo
 
      ```
      git clone https://github.com/zijianzhang/CARLA_INVS.git
      ```
 
-     > > remember change `CARLA_PATH` in `params.py`
+     > remember change `CARLA_PATH` in `params.py`
      >
      > 1. 
      >
