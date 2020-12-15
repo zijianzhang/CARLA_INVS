@@ -6,6 +6,12 @@ import random
 import time
 import numpy as np
 import open3d as o3d
+# amend relative import
+from pathlib import Path
+sys.path.append( Path(__file__).resolve().parent.parent.as_posix() ) #repo path
+sys.path.append( Path(__file__).resolve().parent.as_posix() ) #file path
+from params import *
+
 from utils.calibration import Calibration
 from utils.testo3d import get_strong
 
