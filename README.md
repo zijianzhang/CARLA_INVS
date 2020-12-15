@@ -1,71 +1,108 @@
-# Distributed Dynamic Map Fusion in CARLA Simulation 
-> the full version will be available after paper acceptance...
+# Distributed Dynamic Map Fusion with Federated Knowledge Distill in CARLA Simulation
+<img src="./preview/test2.png" width = "400" alt="图片名称" align=center /><img src="./preview/test1.png" width = "400" alt="图片名称" align=center />
 
-<img src="./preview/test2.png" width = "400" alt="图片名称" align=center />
-<img src="./preview/test1.png" width = "400" alt="图片名称" align=center />
+> The can-do version will be formally released after paper acceptance.
 
-## Feature
-- LiDAR/camera raw data collection in multi-agent synchronously
-- data transformation to KITTI format
-- data visualization with Open3d library
 
-## Requirements
 
-- Python3.6+
-- open3d >= 0.10.0
-- CARLA >= 0.9.8
+[TOC]
 
-## Install
+## Dependency
 
-1.  clone the repo
+- Ubuntu 18.04
+- Python 3.7+
+- CARLA >= 0.9.8, <=0.9.10
+- CUDA>=10.0
+- pytorch<=1.4.0
+- llvm>=10.0
 
+## Installation
+
+1. Clone this repository to your workspace
+
+      ```
+     git clone https://github.com/lasso-sustech/CARLA_INVS.git --branch=main --depth=1
+      ```
+
+2. Enter the directory "CARLA_INVS" and install dependencies with `make`
+     ```bash
+     make dependency
      ```
-     git clone https://github.com/zijianzhang/CARLA_INVS.git
-     ```
+     
+     > use `apt` and `pip3` with network access; so try to speed up downloading with fast mirror sites.
+     
+3.  Download and extract the CARLA simulator to somewhere (e.g., `~/CARLA`), and update `CARLA_PATH` in `params.py` with **absolute path** to the CARLA folder location.
 
-     > remember change `CARLA_PATH` in `params.py`
-     >
-     > 1. 
-     >
-     > (suggest: `~/CARLA`)
+> This repository is composed of three components: `gen_data` for dataset generation and visualization, `PCDet` for training and testing, `fusion` for global map fusion and visualization.
+>
+> The three components share the same configuration file `params.py`.
 
-2. enter the directory `CARLA_INVS` & install packages
-     ```
-     pip3 install -r requirement.txt
-     ```
 
-## Start
-1. start up `CarlaUE4.sh`, and run the following script in shell to look for vehicles spawn points as Fig.1.
 
-   ```
-   python3 Scenario.py spawn
+## Custom Dataset Generation
+> **Features**: 1) LiDAR/camera raw data collection in multi-agent synchronously; 2) data transformation to KITTI format; 3) data visualization with Open3d library.
+
+> **Tuning**: Tune the configurations as you like in `params.py` file under the `gen_data` section.
+
+1. start up `CarlaUE4.sh` in your `CARLA_PATH` firstly and run the following script in shell to look for vehicles spawn points with *point_id*.
+
+   ```bash
+   python3 gen_data/Scenario.py spawn
    ```
 
    <img src="./preview/carla.png" width = "250" height = "250"  alt="图片名称" align=center /> <img src="./preview/fig2.png" width = "250" alt="图片名称" align=center />
 
-2. run the following script in shell to generate mulit-agent raw data. 
+2. run the following script to generate multi-agent raw data
 
    ```bash
-   python3 Scenario.py record x1,x2 y1,y2
-   # The x1,x2,y1,y2 are the spawn points ID.
+   python3 gen_data/Scenario.py record [x_1,...x_N] [y_1,...y_M]
    ```
 
-   where $\mathbf{x}=[x_1,...,x_N]$ for *human-driven vehicles*, $\mathbf{y}=[y_1,...,y_M]$ for *autonomous vehicles*.
+   where `x_1,...,x_N` is list of *point_ids* (separated by comma) for *human-driven vehicles*, and `y_1,...,y_M` for *autonomous vehicles* with sensors installation.
 
-3. run the following script in shell to transform raw data to KITTI format.
+   The recording process would stop when `Ctrl+C` triggered, and the generated *raw data* will be put at `$ROOT_PATH/raw_data`.
+
+3. Run the following script to transform raw data to KITTI format
 
    ```bash
-   python3 Process.py raw_data/record2020_xxxx_xxxx
+   python3 gen_data/Process.py raw_data/record2020_xxxx_xxxx
    ```
 
-4. (Optional) run the following script in shell to view kitti Format data with Open3D as follows.
+   and the cooked KITTI format data will be put at `$ROOT_PATH/dataset`
+
+4. (Optional) run the following script to view *KITTI Format data sample* with Open3D
 
    ```bash
-   python3 Visualization.py dataset/record2020_xxxx_xxxx vehicle_id frame_id
-   # The vehicle_id is the intelligent vehicle ID. The frame_ID is the index of dataset.
+   # The vehicle_id is the intelligent vehicle ID, and the frame_ID is the index of dataset.
+   python3 gen_data/Visualization.py dataset/record2020_xxxx_xxxx vehicle_id frame_id
    ```
 
 <img src="./preview/fig3.png" width = "250" alt="图片名称" align=center />
+
+## Training Procedures
+
+### Training for pre-trained model
+
+> TODO
+
+### Training for federated model
+
+> TODO
+
+### Training for federated distill
+
+> TODO
+
+
+
+## Testing Procedure
+
+- with fusion
+- without fusion
+
+
+
+## Appendix
 
 ### Raw Data Format
 
@@ -110,15 +147,7 @@ dataset
       +- vhicle.xxx.xxx_xxx
 ````
 
-label is the directory to save the ground truth labels.
+- label is the directory to save the ground truth labels.
 
-calib is the calibration matrix from point cloud to image.
+- calib is the calibration matrix from point cloud to image.
 
-## Training Process
-- training for pre-trained model
-- training for federated model
-- online distill training
-
-## Testing Process
-- with fusion
-- without fusion
