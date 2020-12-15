@@ -5,4 +5,4 @@ dependency:
 	sudo apt install libxerces-c-3.2 libjpeg8
 
 clean:
-	@echo "not doen yet..."
+	rm -rf raw_data/ log/
