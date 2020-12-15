@@ -5,7 +5,13 @@ import random
 import time
 import numpy as np
 import open3d as o3d
-from calibration import Calibration
+# amend relative import
+from pathlib import Path
+sys.path.append( Path(__file__).resolve().parent.parent.as_posix() ) #repo path
+sys.path.append( Path(__file__).resolve().parent.as_posix() ) #file path
+from params import *
+from utils.calibration import Calibration
+
 # print('Please input the legal record path and vehicle id.')
 # print('record path: MMDDHHMM    vehicle_id: *')
 
@@ -349,7 +355,7 @@ def custom_draw_geometry(vis, geometry_list, map_file=None, recording=False,para
     for p in geometry_list:
         R = o3d.geometry.get_rotation_matrix_from_xyz([0,0,np.pi*2*test/360])
         # p.rotate(R,[0,0,0])
-    from testo3d import get_strong
+    from utils.testo3d import get_strong
     if paper:
         geometry_list = get_strong(geometry_list)
 
@@ -494,7 +500,7 @@ def dbscan(data,vis=None,geometry_list=None,frame_id=None,map_file=None,times=1,
 
     # from my_utils import nms_3d as nms3d 
     # from eval import d3_box_overlap
-    from d3iou import box3d_iou as iou3d
+    from utils.d3iou import box3d_iou as iou3d
     tmp_list = np.array([list(map(float,tmp.split(' ')))[:8] for tmp in tmp_results.keys()]).reshape(-1,8)
     tmp_bboxes = tmp_list[:,:7]
     tmp_scores = tmp_list[:,7].flatten()   
@@ -584,7 +590,7 @@ def process_theta(alpha):
         alpha += np.pi*2
     return alpha
 
-import kitti_common as kitti
+# import kitti_common as kitti
 # from eval import get_official_eval_result, get_coco_eval_result
 def _read_imageset_file(path):
     with open(path, 'r') as f:

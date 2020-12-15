@@ -4,7 +4,7 @@ __pycache__
 log
 raw_data
 dataset
-# for training
+# for PCDet
 model
 PCDet/build
 PCDet/tools/cfgs/*.yaml
