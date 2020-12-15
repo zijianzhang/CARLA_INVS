@@ -55,7 +55,7 @@
 3. run the following script in shell to transform raw data to KITTI format.
 
    ```bash
-   python3 Process.py tmp/record2020_xxxx_xxxx
+   python3 Process.py raw_data/record2020_xxxx_xxxx
    ```
 
 4. (Optional) run the following script in shell to view kitti Format data with Open3D as follows.

@@ -5,8 +5,11 @@ import copy
 import math
 import shutil
 import glob
+# amend relative import
 from pathlib import Path
-from params import CARLA_PATH
+sys.path.append( Path(__file__).resolve().parent.parent.as_posix() ) #repo path
+sys.path.append( Path(__file__).resolve().parent.as_posix() ) #file path
+from params import *
 
 try:
     _egg_file = sorted(Path(CARLA_PATH, 'PythonAPI/carla/dist').expanduser().glob('carla-*%d.*-%s.egg'%(
@@ -35,20 +38,26 @@ camera_intrinsic_matrix[1, 1] = VIEW_WIDTH / (2.0 * np.tan(VIEW_FOV * np.pi / 36
 
 def get_ego_lidar_data_path(ego_vehicle_label, _frame_id):
     ego_vehicle_name = ego_vehicle_label[0] + '_' + ego_vehicle_label[1]
-    ego_raw_data_path = raw_data_path + '/' + ego_vehicle_name
-    raw_data_file = os.listdir(ego_raw_data_path)
-    raw_data_file.sort()
-    lidar_raw_data_file = ego_raw_data_path + '/' + raw_data_file[-1] + '/' + _frame_id + 'ply'
+    ego_raw_data_path = raw_data_path / ego_vehicle_name
+    raw_data_file     = sorted( ego_raw_data_path.iterdir() )
+    lidar_raw_data_file = ( ego_raw_data_path / raw_data_file[-1] / (_frame_id+'ply') ).as_posix()
+    # ego_raw_data_path = raw_data_path + '/' + ego_vehicle_name
+    # raw_data_file = os.listdir(ego_raw_data_path)
+    # raw_data_file.sort()
+    # lidar_raw_data_file = ego_raw_data_path + '/' + raw_data_file[-1] + '/' + _frame_id + 'ply'
     return lidar_raw_data_file
 
 def get_ego_camera_2Dlabel_path(ego_vehicle_label, camera_id, _frame_id):
     ego_vehicle_name = ego_vehicle_label[0] + '_' + ego_vehicle_label[1]
-    ego_raw_data_path = raw_data_path + '/' + ego_vehicle_name
-    raw_data_file = os.listdir(ego_raw_data_path)
-    raw_data_file.sort()
+    ego_raw_data_path = raw_data_path / ego_vehicle_name
+    raw_data_file     = sorted( ego_raw_data_path.iterdir() )
+    # ego_raw_data_path = raw_data_path + '/' + ego_vehicle_name
+    # raw_data_file = os.listdir(ego_raw_data_path)
+    # raw_data_file.sort()
     for _file in raw_data_file:
-        if str(camera_id) in _file and 'label' in _file:
-            camera_2Dlabel_file = ego_raw_data_path + '/' + _file + '/' + _frame_id + 'txt'
+        if str(camera_id) in str(_file) and 'label' in str(_file):
+            camera_2Dlabel_file = ( ego_raw_data_path / _file / (_frame_id+'txt') ).as_posix()
+            # camera_2Dlabel_file = ego_raw_data_path + '/' + _file + '/' + _frame_id + 'txt'
             return camera_2Dlabel_file
 
 def get_raw_lidar_data(lidar_raw_data_file, sensor_rotation):
@@ -140,7 +149,8 @@ def get_vehicle_bbox(other_vehilcle_label, sensor_center, sensor_rotation, flag=
 
 def get_calib_file(raw_data_path, frame_id, ego_vehicle_label,index, calib_info):
     ego_vehicle_name = ego_vehicle_label[0]+'_'+ego_vehicle_label[1]
-    dataset_path = 'dataset/' + raw_data_path[4:] + '/' + ego_vehicle_name
+    dataset_path = (COOK_DATA_PATH / raw_data_path.stem / ego_vehicle_name).as_posix()
+    # dataset_path = 'dataset/' + raw_data_path[4:] + '/' + ego_vehicle_name
     if not os.path.exists(dataset_path+'/calib0'+str(index)):
         os.makedirs(dataset_path+'/calib0'+str(index))
     np.savetxt(dataset_path + '/calib0'+str(index)+'/' + frame_id, np.array(calib_info), fmt='%s', delimiter=' ')
@@ -149,9 +159,11 @@ def get_calib_file(raw_data_path, frame_id, ego_vehicle_label,index, calib_info)
 
 def write_labels(raw_data_path, frame_id, ego_vehicle_label, tmp_bboxes, pointcloud, index, camera_id, calib_info):
     ego_vehicle_name = ego_vehicle_label[0]+'_'+ego_vehicle_label[1]
-    dataset_path = 'dataset/' + raw_data_path[4:] + '/' + ego_vehicle_name
-    raw_data_path += '/' + ego_vehicle_name
-    sensor_raw_path = os.listdir(raw_data_path)
+    dataset_path = (COOK_DATA_PATH / raw_data_path.stem / ego_vehicle_name).as_posix()
+    # dataset_path = 'dataset/' + raw_data_path[4:] + '/' + ego_vehicle_name
+    _raw_data_path = (raw_data_path / ego_vehicle_name).as_posix()
+    # raw_data_path += '/' + ego_vehicle_name
+    sensor_raw_path = os.listdir(_raw_data_path)
     if not os.path.exists(dataset_path+'/label0'+str(index)):
         os.makedirs(dataset_path+'/label0'+str(index))
     if not os.path.exists(dataset_path+'/image0'+str(index)):
@@ -162,8 +174,9 @@ def write_labels(raw_data_path, frame_id, ego_vehicle_label, tmp_bboxes, pointcl
         os.makedirs(dataset_path+'/velodyne')
     
     for _tmp in sensor_raw_path:
-        if str(camera_id) in _tmp and 'label' not in _tmp: 
-            image_path = raw_data_path + '/' + _tmp + '/' + frame_id[:-3] + 'png' 
+        if str(camera_id) in _tmp and 'label' not in _tmp:
+            image_path = Path( _raw_data_path, _tmp, frame_id[:-3]+'png' ).as_posix()
+            # image_path = raw_data_path + '/' + _tmp + '/' + frame_id[:-3] + 'png' 
             break
     shutil.copy(image_path, dataset_path+'/image0'+str(index))
     # np.savetxt(dataset_path + '/calib0'+str(index)+'/' + frame_id, np.array(calib_info), fmt='%s', delimiter=' ')
@@ -304,8 +317,8 @@ def judge_in_ROI_numbers(other_vehilcle_label,AD_vehicles_location,_frame_id):
 
 if __name__ == "__main__":
     # raw_data_path = 'tmp/record' + ' '.join(['2020',str(sys.argv[1][:4]),str(sys.argv[1][-4:])])
-    raw_data_path = str(sys.argv[1])
-    label_file_path = raw_data_path + '/label/'
+    raw_data_path = Path( sys.argv[1] ).resolve()
+    label_file_path = (raw_data_path / 'label').as_posix()
     frames = os.listdir(label_file_path)
 
     def _read_imageset_file(path):
@@ -314,14 +327,21 @@ if __name__ == "__main__":
         return [int(line) for line in lines]
     # gt_split_file = 'dataset/record2020_0903_0142_/img_list_test.txt'
     # frames = _read_imageset_file(gt_split_file)
-    global_label_file_path = 'dataset/' + raw_data_path[4:] + '/global_label/'
+    global_label_file_path = COOK_DATA_PATH / raw_data_path.stem / 'global_label'
+    global_label_file_path.mkdir(parents=True, exist_ok=True)
+    global_label_file_path = global_label_file_path.as_posix()
+    # global_label_file_path = 'dataset/' + raw_data_path[4:] + '/global_label/'
     frames.sort()
 
     if len(frames) < 10:
         print("there is no enough data.")
     # exit()
     print(len(frames))
-    frame_start,frame_end,frame_hz = 60,-10,1
+    
+    frame_start = RAW_DATA_START
+    frame_end   = RAW_DATA_END
+    frame_hz    = RAW_DATA_FREQ
+    # frame_start,frame_end,frame_hz = 60,-10,1
     for _frame in frames[frame_start:frame_end:frame_hz]:
         # continue
         # if '683' not in _frame:
@@ -329,15 +349,17 @@ if __name__ == "__main__":
         # _frame = str(_frame).rjust(10,'0') + '.txt'
         if not os.path.exists(global_label_file_path):
             os.makedirs(global_label_file_path)
-        shutil.copy(label_file_path+_frame,global_label_file_path)
-        labels = np.loadtxt(label_file_path + _frame, dtype='str', delimiter=' ')
-        tmp_car_id = ['282','274','284','275','276']
-        AD_vehicles = [v for v in os.listdir(raw_data_path) if 'vehicle' in v]
+        _frame_label_file_path = Path(label_file_path, _frame).as_posix()
+        shutil.copy(_frame_label_file_path, global_label_file_path)
+        labels = np.loadtxt(_frame_label_file_path, dtype='str', delimiter=' ')
+        # tmp_car_id = ['282','274','284','275','276']
+        # AD_vehicles = [v for v in raw_data_path.iterdir() if 'vehicle' in v]
+        AD_vehicles = [v for v in os.listdir(str(raw_data_path)) if 'vehicle' in v]
         AD_vehicles_location = find_Ad_vehicles_location(AD_vehicles,labels)
         for ego_vehicle_label in labels:
             tmp_name = ego_vehicle_label[0] + '_' + ego_vehicle_label[1]
             # tmp_car = ['282','274','284','275','276']
-            tmp_car = ['235','236','237','238','240','275']
+            # tmp_car = ['235','236','237','238','240','275']
             if 'vehicle.tesla' in ego_vehicle_label[0]:# and tmp_name in AD_vehicles_location.keys():# and '319' in ego_vehicle_label[1]:
                 # if ego_vehicle_label[1] not in tmp_car:
                 #     continue
@@ -484,12 +506,13 @@ if __name__ == "__main__":
                     # exit()
             else:
                 continue
-    global_label_file_path = 'dataset/' + raw_data_path[4:] + '/img_list.txt'
-    frame_hz_alt = frame_hz #FIXME: for other imglist with higher frame_hz
-    frames = [frame[:-4] for frame in frames[frame_start:frame_end:frame_hz_alt]]
     
+    img_list_file_path = (COOK_DATA_PATH / raw_data_path.stem / 'img_list.txt').as_posix()
+    frame_hz_alt = RAW_DATA_FREQ_ALT #for other img_list with higher frame_hz
+    frames = [frame[:-4] for frame in frames[frame_start:frame_end:frame_hz_alt]]
+    np.savetxt(img_list_file_path, np.array(frames),fmt='%s', delimiter=' ')
     # training: 0:510:3
     # testing: 510:1100:1
     # if not os.path.exists(global_label_file_path):
     #     os.makedirs(global_label_file_path[:-13])
-    np.savetxt(global_label_file_path, np.array(frames),fmt='%s', delimiter=' ')
+    # np.savetxt(global_label_file_path, np.array(frames),fmt='%s', delimiter=' ')
