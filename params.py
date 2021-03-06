@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 from pathlib import Path
 
-CARLA_PATH = Path('~/CARLA').expanduser()
+CARLA_PATH = Path('~/CARLA_0.9.10').expanduser() #Path('~/CARLA').expanduser()
 ROOT_PATH  = Path(__file__).parent
 
-#for gen_data
+##for gen_data
 LOG_PATH   = ROOT_PATH / 'log'
 RAW_DATA_PATH  = ROOT_PATH / 'raw_data'
 COOK_DATA_PATH = ROOT_PATH / 'dataset'
@@ -15,4 +15,4 @@ RAW_DATA_END    = -10#frame
 RAW_DATA_FREQ   = 1#Hz
 RAW_DATA_FREQ_ALT=1#Hz, for img_list generation
 
-#for PCDet
+##for PCDet

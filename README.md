@@ -22,16 +22,16 @@
 
       ```
      git clone https://github.com/lasso-sustech/CARLA_INVS.git --branch=main --depth=1
-      ```
+     ```
 
 2. Enter the directory "CARLA_INVS" and install dependencies with `make`
      ```bash
      make dependency
      ```
      
-     > use `apt` and `pip3` with network access; so try to speed up downloading with fast mirror sites.
+     > It uses `apt` and `pip3` with network access. You can try speed up downloading with fast mirror sites.
      
-3.  Download and extract the CARLA simulator to somewhere (e.g., `~/CARLA`), and update `CARLA_PATH` in `params.py` with **absolute path** to the CARLA folder location.
+3.  Download and extract the CARLA simulator somewhere (e.g., `~/CARLA`), and update `CARLA_PATH` in `params.py` with **absolute path** to the CARLA folder location.
 
 > This repository is composed of three components: `gen_data` for dataset generation and visualization, `PCDet` for training and testing, `fusion` for global map fusion and visualization.
 >
