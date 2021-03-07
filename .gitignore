@@ -1,0 +1,10 @@
+.vscode
+__pycache__
+# for gen_data
+log
+raw_data
+dataset
+# for PCDet
+model
+PCDet/build
+PCDet/tools/cfgs/*.yaml

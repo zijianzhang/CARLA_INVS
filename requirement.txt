@@ -1,6 +1,5 @@
 open3d>=0.10
 plyfile
-networkx                 
-notebook                 
+notebook
 numpy
 matplotlib
