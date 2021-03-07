@@ -1,11 +1,21 @@
 # Distributed Dynamic Map Fusion with Federated Knowledge Distill in CARLA Simulation
 <img src="./preview/test2.png" width = "400" alt="图片名称" align=center /><img src="./preview/test1.png" width = "400" alt="图片名称" align=center />
 
-> The can-do version will be formally released after paper acceptance.
-
 
 
 [TOC]
+
+## Citation
+
+```latex
+@INPROCEEDINGS{INVS2021
+	author={Z. {Zhang} and S. {Wang} and Y. {Hong} and L. {Zhou} and Q. {Hao},
+	title={Distributed dynamic map fusion via federated learning for intelligent networked vehicles},
+	booktitle={2021 {IEEE} International Conference on Robotics and Automation, {ICRA}
+               2021, Xi’an, China, May 2021},
+	year={2021}
+}
+```
 
 ## Dependency
 
