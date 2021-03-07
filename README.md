@@ -102,7 +102,7 @@ python3 visualization/Visualization_local.py ../data/record2020_1027_1957 713 39
 **View fusion map**
 ```bash
 cd fusion;
-python3 Visualization/Visualization_fusion_map.py ../data/record2020_1027_1957 38549
+python3 visualization/Visualization_fusion_map.py ../data/record2020_1027_1957 38549
 ```
 
 ## Contact

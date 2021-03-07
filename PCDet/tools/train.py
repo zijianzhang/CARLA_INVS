@@ -24,6 +24,7 @@ def parge_config():
     parser.add_argument('--id', type=int, default=1)
 
     parser.add_argument('--data_dir', type=str, default=None)
+    parser.add_argument('--root_dir', type=str, help="root working path")
     parser.add_argument('--batch_size', type=int, default=16, required=False, help='batch size for training')
     parser.add_argument('--epochs', type=int, default=80, required=False, help='number of epochs to train for')
     parser.add_argument('--workers', type=int, default=4, help='number of workers for dataloader')
@@ -62,6 +63,9 @@ def main():
     if args.fix_random_seed:
         common_utils.set_random_seed(666)
 
+    #NOTE: fix ROOT_DIR
+    if args.root_dir:
+        cfg.ROOT_DIR = Path(args.root_dir)
     output_dir = cfg.ROOT_DIR / 'output' / cfg.TAG / args.extra_tag
     output_dir.mkdir(parents=True, exist_ok=True)
     ckpt_dir = output_dir / 'ckpt'

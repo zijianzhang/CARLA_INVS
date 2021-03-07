@@ -36,12 +36,12 @@ except Exception as e:
 
 with workSpace(TRAIN_ROOT) as wrk: #chdir to 'tools' folder
     if ITER == 0: # no pretrain model
-        sp.run(['bash', '-c', 'python3 train.py --cfg_file cfgs/tesla713.yaml --batch_size 1 --workers 0 --epochs 1'])
-        sp.run(['bash', '-c', 'python3 train.py --cfg_file cfgs/tesla714.yaml --batch_size 1 --workers 0 --epochs 1'])
+        sp.run(['bash', '-c', 'python3 train.py --cfg_file cfgs/tesla713.yaml --batch_size 1 --workers 0 --epochs 1 --root_dir %s'%ROOT_PATH])
+        sp.run(['bash', '-c', 'python3 train.py --cfg_file cfgs/tesla714.yaml --batch_size 1 --workers 0 --epochs 1 --root_dir %s'%ROOT_PATH])
 
     if ITER >= 1: # train from last global model
-        sp.run(['bash', '-c', 'python3 train.py --cfg_file cfgs/tesla713.yaml --batch_size 1 --workers 0 --epochs 1 --pretrained_model %s'%model713_file])
-        sp.run(['bash', '-c', 'python3 train.py --cfg_file cfgs/tesla714.yaml --batch_size 1 --workers 0 --epochs 1 --pretrained_model %s'%model714_file])
+        sp.run(['bash', '-c', 'python3 train.py --cfg_file cfgs/tesla713.yaml --batch_size 1 --workers 0 --epochs 1 --pretrained_model %s --root_dir %s'%(model713_file, ROOT_PATH)])
+        sp.run(['bash', '-c', 'python3 train.py --cfg_file cfgs/tesla714.yaml --batch_size 1 --workers 0 --epochs 1 --pretrained_model %s --root_dir %s'%(model714_file, ROOT_PATH)])
     pass
 
   
