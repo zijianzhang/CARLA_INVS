@@ -83,7 +83,8 @@
 
 ### Training for federated model
 
-> TODO
+1. prepare sample dataset in `$ROOT_PATH/data` ([link](https://cloud.189.cn/t/jQJvuimquaEj))
+2. run `python3 PCDet/INVS_main.py`
 
 ### Training for federated distill
 
@@ -93,13 +94,13 @@
 
 ## Evaluation Procedures
 
-**View local map**
+### View local map
 ```bash
 cd fusion;
 python3 visualization/Visualization_local.py ../data/record2020_1027_1957 713 39336
 ```
 
-**View fusion map**
+### View fusion map
 ```bash
 cd fusion;
 python3 visualization/Visualization_fusion_map.py ../data/record2020_1027_1957 38549
