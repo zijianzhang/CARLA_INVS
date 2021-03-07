@@ -81,26 +81,24 @@
 
 ## Training Procedures
 
-### Training for pre-trained model
-
-> TODO
-
 ### Training for federated model
 
 > TODO
 
 ### Training for federated distill
 
-> TODO
+> To be updated.
 
 
 
-## Testing Procedure
+## Evaluation Procedures
 
 - with fusion
 - without fusion
 
+## Contact
 
+Should you have any question, please create issues, or contact [Shuai Wang](mailto:wangs3__at__sustech.edu.cn).
 
 ## Appendix
 
