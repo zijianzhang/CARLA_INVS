@@ -169,3 +169,10 @@ dataset
 
 - calib is the calibration matrix from point cloud to image.
 
+### Authors
+
+Zijian Zhang
+
+[Yuncong Hong](https://iamhyc.github.io)
+
+[Shuai Wang](https://faculty.sustech.edu.cn/wangs3/en/)
