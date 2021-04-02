@@ -7,4 +7,3 @@ dataset
 # for PCDet
 model
 PCDet/build
-PCDet/tools/cfgs/*.yaml
