@@ -50,12 +50,7 @@ def train_one_epoch(model, optimizer, train_loader, model_func, lr_scheduler, ac
         accumulated_iter += 1
         disp_dict.update({'loss': loss.item(), 'lr': cur_lr})
         
-        # print(accumulated_iter)
-        # print(loss)
 
-        with open("./loss.txt", 'ab') as abc:
-            np.savetxt(abc, np.array([accumulated_iter]), delimiter=",")
-            np.savetxt(abc, np.array([loss]), delimiter=",")
 
         # log to console and tensorboard
         if rank == 0:
