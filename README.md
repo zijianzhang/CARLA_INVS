@@ -15,6 +15,13 @@
                2021, Xi’an, China, May 2021},
 	year={2021}
 }
+
+@INPROCEEDINGS{FLCAV2021
+	author={S. {Wang} and Q. {Hao} and D. W. K. {Ng} and Y. C. {Eldar} and H. V. {Poor},
+	title={Federated learning meets connected autonomous vehicle perception: Principles and implementation},
+	booktitle={submitted to IEEE for possible publication},
+	year={2021}
+}
 ```
 
 ## Dependency
