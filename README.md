@@ -16,7 +16,7 @@
 	year={2021}
 }
 
-@INPROCEEDINGS{FLCAV2021
+@article{FLCAV2021
 	author={S. {Wang} and Q. {Hao} and D. W. K. {Ng} and Y. C. {Eldar} and H. V. {Poor},
 	title={Federated learning meets connected autonomous vehicle perception: Principles and implementation},
 	booktitle={submitted to IEEE for possible publication},
