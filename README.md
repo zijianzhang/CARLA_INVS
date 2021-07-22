@@ -1,4 +1,4 @@
-# Distributed Dynamic Map Fusion with Federated Knowledge Distill in CARLA Simulation
+# Distributed Dynamic Map Fusion and Federated Learning in CARLA Simulation
 <img src="./preview/test2.png" width = "400" alt="图片名称" align=center /><img src="./preview/test1.png" width = "400" alt="图片名称" align=center />
 
 
