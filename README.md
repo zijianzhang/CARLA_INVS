@@ -176,7 +176,7 @@ dataset
 
 - calib is the calibration matrix from point cloud to image.
 
-### KITTI Format
+### PCDet Format
 
 ````
 data
@@ -184,9 +184,9 @@ data
       +- global_label    # same as global labels in “dataset”
       +- vhicle.xxx.xxx_xxx
    +- Imagesets
-      +- train.txt   # same format as img_list.txt in “dataset”
-      +- test.txt
-      +- val.txt
+       +- train.txt   # same format as img_list.txt in “dataset”
+       +- test.txt
+       +- val.txt
    +- training
       +- calib  # same as calib00 in “dataset”
           +- 0000.txt
@@ -202,7 +202,7 @@ data
           +- 0001.bin
 ````
 
-With the above data structure, run the following:
+With the above data structure, run the following command
 ```
 cd ./PCDet/pcdet/datasets/kitti
 python3 preprocess.py create_kitti_infos record2020_xxxx_xxxx vhicle_id
