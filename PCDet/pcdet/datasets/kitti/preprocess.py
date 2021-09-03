@@ -539,16 +539,17 @@ def create_kitti_infos(data_path, save_path, workers=4):
 
 if __name__ == '__main__':
     if sys.argv.__len__() > 1 and sys.argv[1] == 'create_kitti_infos':
-        filename = 'vehicle.tesla.model3_' + sys.argv[2]
+        foldername = sys.argv[2]
+        filename = 'vehicle.tesla.model3_' + sys.argv[3]
         create_kitti_infos(
-            data_path=cfg.ROOT_DIR / 'data/v2xp' / filename,
-            save_path=cfg.ROOT_DIR / 'data/v2xp' / filename
+            data_path=cfg.ROOT_DIR / 'data' / foldername / filename,
+            save_path=cfg.ROOT_DIR / 'data' / foldername / filename
         )
     else:
         A = KittiDataset(root_path='data' / filename, class_names=cfg.CLASS_NAMES, split='train', training=True)
         import pdb
         ans = A[1]
 
-# python3 preprocess.py create_kitti_infos 713/714/715/716, NOTE: 714 is a truck
+# python3 preprocess.py create_kitti_infos record2020_xxxx_xxxx 713/714/715/716, NOTE: 714 is a truck
 # put the dataset under folder cfg.ROOT_DIR / data
 
