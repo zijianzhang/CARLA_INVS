@@ -21,6 +21,6 @@ print(ENTRY_FILE)
 
 while counter < ITER_MAX:
     print('===================== %d ====================='%counter)
-    sp.run([ENTRY_FILE, counter])
+    sp.run([ENTRY_FILE, str(counter)])
     counter += 1
     pass
