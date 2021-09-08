@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 from pathlib import Path
+from os import chdir
 
 CARLA_PATH = Path('~/CARLA_0.9.10').expanduser() #Path('~/CARLA').expanduser()
 ROOT_PATH  = Path(__file__).parent
