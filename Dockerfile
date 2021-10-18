@@ -13,7 +13,8 @@ RUN sed -i '/bintray/d' /etc/apt/sources.list && \
         vim \
         curl \
         sudo \
-        wget && \
+        wget \
+        libgl1-mesa-glx && \
     pip3 install --no-cache-dir pip -U -i ${PYPI_MIRROR} --trusted-host ${MIRROR} && \
     pip3 config set global.index-url ${PYPI_MIRROR} && \
     pip3 config set install.trusted-host ${MIRROR} && \
@@ -77,6 +78,26 @@ RUN chown -R carla:carla /home/carla
 RUN echo "carla:carla" | chpasswd && \
     usermod -aG sudo carla
 
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt update && \
+    apt-get install -y --no-install-recommends \
+        libsdl2-2.0 xserver-xorg libvulkan1 && \
+    pip3 install -r requirements.txt && \
+    rm -rf /var/lib/apt/lists/*    
+
 USER carla
 
-WORKDIR  /home/carla/PythonAPI
+RUN sed -i "s@~/CARLA_0.9.10@/home/carla@g" /home/carla/PythonAPI/CARLA_INVS/params.py
+
+WORKDIR  /home/carla/PythonAPI/CARLA_INVS
+# export PYTHONPATH=$PYTHONPATH:/home/carla/PythonAPI/carla/dist/carla-0.9.10-py3.7-linux-x86_64.egg
+
+
+
+ENV NVIDIA_VISIBLE_DEVICES \
+    ${NVIDIA_VISIBLE_DEVICES:-all}
+ENV NVIDIA_DRIVER_CAPABILITIES \
+    ${NVIDIA_DRIVER_CAPABILITIES:+$NVIDIA_DRIVER_CAPABILITIES,}graphics
+
+# Example: 
+# docker run -it --rm --network=host --gpus all --runtime=nvidia -e DISPLAY harbor.isus.tech/carla1s/carla-invs:0.9.10 bash
