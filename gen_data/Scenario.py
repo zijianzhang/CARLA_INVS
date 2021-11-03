@@ -5,12 +5,13 @@ import time
 import glob
 # amend relative import
 from pathlib import Path
-sys.path.append( Path(__file__).resolve().parent.parent.as_posix() ) #repo path
-sys.path.append( Path(__file__).resolve().parent.as_posix() ) #file path
+
+sys.path.append(Path(__file__).resolve().parent.parent.as_posix())  # repo path
+sys.path.append(Path(__file__).resolve().parent.as_posix())  # file path
 from params import *
 
 try:
-    _egg_file = sorted(Path(CARLA_PATH, 'PythonAPI/carla/dist').expanduser().glob('carla-*%d.*-%s.egg'%(
+    _egg_file = sorted(Path(CARLA_PATH, 'PythonAPI/carla/dist').expanduser().glob('carla-*%d.*-%s.egg' % (
         sys.version_info.major,
         'win-amd64' if os.name == 'nt' else 'linux-x86_64'
     )))[0].as_posix()
@@ -38,12 +39,12 @@ FutureActor = carla.command.FutureActor
 ApplyVehicleControl = carla.command.ApplyVehicleControl
 Attachment = carla.AttachmentType
 
-import matplotlib.pyplot as plt     
+import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
 try:
-    sys.path.append(Path(CARLA_PATH, 'PythonAPI/carla').expanduser().as_posix() )
-    sys.path.append(Path(CARLA_PATH, 'PythonAPI/examples').expanduser() )
+    sys.path.append(Path(CARLA_PATH, 'PythonAPI/carla').expanduser().as_posix())
+    sys.path.append(Path(CARLA_PATH, 'PythonAPI/examples').expanduser())
 except IndexError:
     pass
 
@@ -51,6 +52,7 @@ from agents.navigation.behavior_agent import BehaviorAgent  # pylint: disable=im
 from agents.navigation.basic_agent import BasicAgent  # pylint: disable=import-error
 
 from utils.get2Dlabel import ClientSideBoundingBoxes
+
 
 class Args(object):
     def __init__(self, argv=None):
@@ -63,20 +65,20 @@ class Args(object):
 
         # map information
         self.map_name = TOWN_MAP
-        self.spectator_point = [(100,150,150),(-60,90,0)]
-        self.ROI = [[-140,-150],[-140, 140],[150, 140],[150, -150]]
-        self.initial_spawn_ROI = [[-80,-70,0,100],
-                                    [-90,-80,-120,0],
-                                    [-150,-90,0,10],
-                                    [0,10,0,100],
-                                    [-10,0,-150,0],
-                                    [0,150,-10,0]]
-        self.additional_spawn_ROI = [[-80,-70,90,100],
-                                    [-90,-80,-120,-100],
-                                    [-150,-140,0,10],
-                                    [0,10,80,135],
-                                    [-10,0,-150,-120],
-                                    [140,150,-10,0]]
+        self.spectator_point = [(100, 150, 150), (-60, 90, 0)]
+        self.ROI = [[-140, -150], [-140, 140], [150, 140], [150, -150]]
+        self.initial_spawn_ROI = [[-80, -70, 0, 100],
+                                  [-90, -80, -120, 0],
+                                  [-150, -90, 0, 10],
+                                  [0, 10, 0, 100],
+                                  [-10, 0, -150, 0],
+                                  [0, 150, -10, 0]]
+        self.additional_spawn_ROI = [[-80, -70, 90, 100],
+                                     [-90, -80, -120, -100],
+                                     [-150, -140, 0, 10],
+                                     [0, 10, 80, 135],
+                                     [-10, 0, -150, -120],
+                                     [140, 150, -10, 0]]
 
         # server information
         # self.fixed_delta_seconds = 0.1
@@ -86,36 +88,38 @@ class Args(object):
         # record information
         self.sync = True
         self.time = time.strftime("%Y_%m%d_%H%M", time.localtime())
-        self.recorder_filename = ( LOG_PATH / ('record'+self.time+'.log') ).as_posix()
+        self.recorder_filename = (LOG_PATH / ('record' + self.time + '.log')).as_posix()
         # self.recorder_filename = os.getcwd() + '/' + 'log/record' + self.time + '.log'
         if argv:
             self.task = argv[1]
             if self.task == 'record' and len(argv) == 4:
-                self.hd_id = [int(id) for id in argv[2].split(',')] #'hd' for 'human driver'
-                self.av_id = [int(id) for id in argv[3].split(',')] #'av' for 'autonomous vehicle'
+                self.hd_id = [int(id) for id in argv[2].split(',')]  # 'hd' for 'human driver'
+                self.av_id = [int(id) for id in argv[3].split(',')]  # 'av' for 'autonomous vehicle'
             if len(argv) > 2 and self.task == 'replay':
                 self.recorder_filename = self.recorder_filename[:-13] + sys.argv[2] + '.log'
             elif len(argv) == 2 and self.task == 'replay':
                 record_path = os.listdir(self.recorder_filename[:-24])
                 self.recorder_filename = self.recorder_filename[:-24] + record_path[-1]
-                
+
         self.time_factor = 1.0
         self.camera = 0
         self.start = 0
         self.duration = 0
         # raw data information
-        self.raw_data_path = RAW_DATA_PATH / ('record'+self.time)
+        self.raw_data_path = RAW_DATA_PATH / ('record' + self.time)
         # self.raw_data_path = 'tmp/record' + self.time + '/'
         self.image_width = 1242
         self.image_height = 375
         self.VIEW_FOV = 90
-        
+
         self.calibration = np.identity(3)
         self.calibration[0, 2] = self.image_width / 2.0
         self.calibration[1, 2] = self.image_height / 2.0
-        self.calibration[0, 0] = self.calibration[1, 1] = self.image_width / (2.0 * np.tan(self.VIEW_FOV * np.pi / 360.0))
+        self.calibration[0, 0] = self.calibration[1, 1] = self.image_width / (
+                    2.0 * np.tan(self.VIEW_FOV * np.pi / 360.0))
 
         self.sample_frequence = 1  # 20frames/s
+
 
 class Map(object):
     def __init__(self, args):
@@ -125,7 +129,7 @@ class Map(object):
         self.initial_spectator(args.spectator_point)
         self.tmp_spawn_points = self.world.get_map().get_spawn_points()
         if self.pretrain_model:
-            self.initial_spawn_points =self.tmp_spawn_points
+            self.initial_spawn_points = self.tmp_spawn_points
         else:
             self.initial_spawn_points = self.check_spawn_points(args.initial_spawn_ROI)
         self.additional_spawn_points = self.check_spawn_points(args.additional_spawn_ROI)
@@ -140,40 +144,41 @@ class Map(object):
 
     def initial_spectator(self, spectator_point):
         spectator = self.world.get_spectator()
-        spectator_point_transform = carla.Transform(carla.Location( spectator_point[0][0],
-                                                                    spectator_point[0][1],
-                                                                    spectator_point[0][2]), 
-                                                    carla.Rotation( spectator_point[1][0],
-                                                                    spectator_point[1][1],
-                                                                    spectator_point[1][2]))
+        spectator_point_transform = carla.Transform(carla.Location(spectator_point[0][0],
+                                                                   spectator_point[0][1],
+                                                                   spectator_point[0][2]),
+                                                    carla.Rotation(spectator_point[1][0],
+                                                                   spectator_point[1][1],
+                                                                   spectator_point[1][2]))
         spectator.set_transform(spectator_point_transform)
 
     def check_spawn_points(self, check_spawn_ROI):
         tmp_spawn_points = []
-        tmpx,tmpy = [],[]
+        tmpx, tmpy = [], []
         for tmp_transform in self.tmp_spawn_points:
             tmp_location = tmp_transform.location
             for edge in check_spawn_ROI:
-                if tmp_location.x > edge[0] and tmp_location.x < edge[1] and tmp_location.y > edge[2] and tmp_location.y < edge[3]:
+                if tmp_location.x > edge[0] and tmp_location.x < edge[1] and tmp_location.y > edge[
+                    2] and tmp_location.y < edge[3]:
                     tmp_spawn_points.append(tmp_transform)
                     tmpx.append(tmp_location.x)
                     tmpy.append(tmp_location.y)
                     continue
         # self.plot_points(tmpx,tmpy)
         return tmp_spawn_points
-    
-    def plot_points(self,tmpx,tmpy):
-        plt.figure(figsize=(8,7))
+
+    def plot_points(self, tmpx, tmpy):
+        plt.figure(figsize=(8, 7))
         ax = plt.subplot(111)
-        ax.axis([-50,250,50,350])
-        ax.scatter(tmpx,tmpy)
+        ax.axis([-50, 250, 50, 350])
+        ax.scatter(tmpx, tmpy)
         for index in range(len(tmpx)):
-            ax.text(tmpx[index],tmpy[index],index)
+            ax.text(tmpx[index], tmpy[index], index)
         plt.show()
 
     def init_destination(self, spawn_points, ROI):
         destination = []
-        tmpx,tmpy = [],[]
+        tmpx, tmpy = [], []
         for p in spawn_points:
             if not self.inROI([p.location.x, p.location.y], ROI):
                 destination.append(p)
@@ -181,19 +186,19 @@ class Map(object):
                 tmpy.append(p.location.y)
         # self.plot_points(tmpx,tmpy)
         return destination
-    
-    def sign(self,a,b,c):
-        return (a[0]-c[0])*(b[1]-c[1])-(b[0]-c[0])*(a[1]-c[1])
-    
-    def inROI(self,x,ROI):
-        d1=self.sign(x,ROI[0],ROI[1])
-        d2=self.sign(x,ROI[1],ROI[2])
-        d3=self.sign(x,ROI[2],ROI[3])
-        d4=self.sign(x,ROI[3],ROI[0])
 
-        has_neg=(d1<0) or (d2<0) or (d3<0) or (d4<0)
-        has_pos=(d1>0) or (d2>0) or (d3>0) or (d4>0)
-        return not(has_neg and has_pos)
+    def sign(self, a, b, c):
+        return (a[0] - c[0]) * (b[1] - c[1]) - (b[0] - c[0]) * (a[1] - c[1])
+
+    def inROI(self, x, ROI):
+        d1 = self.sign(x, ROI[0], ROI[1])
+        d2 = self.sign(x, ROI[1], ROI[2])
+        d3 = self.sign(x, ROI[2], ROI[3])
+        d4 = self.sign(x, ROI[3], ROI[0])
+
+        has_neg = (d1 < 0) or (d2 < 0) or (d3 < 0) or (d4 < 0)
+        has_pos = (d1 > 0) or (d2 > 0) or (d3 > 0) or (d4 > 0)
+        return not (has_neg and has_pos)
 
     def shuffle_spawn_points(self, spawn_points, start=False):
         # random.shuffle(spawn_points)
@@ -204,45 +209,53 @@ class Map(object):
             cav = [spawn_points[i] for i in self.av_id]
             hd = [spawn_points[i] for i in self.hd_id]
             if len(cav) == 0 and len(hd) == 0:
-                return spawn_points[:60],spawn_points[-20:]
+                return spawn_points[:60], spawn_points[-20:]
             else:
                 return hd, cav
-            
+
+
 class Server(object):
     def __init__(self):
         pass
 
+
 class Vehicle_Agent(BehaviorAgent):
     def __init__(self, vehicle):
+        self.id = vehicle.id
         BehaviorAgent.__init__(self, vehicle)
-    
+
     def planning_ang_control(self):
         pass
 
-class CAVcontrol_Thread(Thread):   
+
+class CAVcontrol_Thread(Thread):
     #   继承父类threading.Thread
-    def __init__(self, vehicle, world, destination, num_min_waypoints, control):
+    def __init__(self, vehicle, world, destination, num_min_waypoints, apply_vehicle_control):
         Thread.__init__(self)
         self.v = vehicle
+        self.id = vehicle.id
         self.w = world
         self.d = destination
         self.n = num_min_waypoints
-        self.c = control
-        self.start()   
-
-    def run(self):                      
-        #   把要执行的代码写到run函数里面 线程在创建后会直接运行run函数 
+        self.c_cmd = apply_vehicle_control
         self.control = None
-        self.control = self.c(self.v._vehicle.id, self.v.run_step())
+        self.v.set_target_speed(15.0)
+        self.start()
 
-    def return_control(self):           
+    def run(self):
+        #   把要执行的代码写到run函数里面 线程在创建后会直接运行run函数
+        self.control = self.v.run_step()
+        self.c_cmd = self.c_cmd(self.id, self.control)
+
+    def return_control(self):
         #   threading.Thread.join(self) # 等待线程执行完毕
         self.join()
         try:
-            return self.control
+            return self.c_cmd
         except Exception:
             print('This is an issue')
-   
+
+
 class CAVcollect_Thread(Thread):
     def __init__(self, parent_id, sensor_attribute, sensor_transform, args):
         Thread.__init__(self)
@@ -254,7 +267,7 @@ class CAVcollect_Thread(Thread):
         world = self.client.get_world()
         self.sensor = None
         self._parent = world.get_actor(parent_id)
-        self._camera_transforms = sensor_transform#(sensor_transform, Attachment.Rigid)
+        self._camera_transforms = sensor_transform  # (sensor_transform, Attachment.Rigid)
         bp_library = world.get_blueprint_library()
         bp = bp_library.find(sensor_attribute[0])
         if sensor_attribute[0].startswith('sensor.camera'):
@@ -266,9 +279,9 @@ class CAVcollect_Thread(Thread):
                 bp.set_attribute(attr_name, attr_value)
         elif sensor_attribute[0].startswith('sensor.lidar'):
             bp.set_attribute('range', '100')
-            bp.set_attribute('channels','64')
-            bp.set_attribute('points_per_second','2240000')
-            bp.set_attribute('rotation_frequency','20')
+            bp.set_attribute('channels', '64')
+            bp.set_attribute('points_per_second', '2240000')
+            bp.set_attribute('rotation_frequency', '20')
             bp.set_attribute('sensor_tick', str(0.05))
             bp.set_attribute('dropoff_general_rate', '0.0')
             bp.set_attribute('dropoff_intensity_limit', '1.0')
@@ -276,46 +289,48 @@ class CAVcollect_Thread(Thread):
             # bp.set_attribute('noise_stddev', '0.0')
         sensor_attribute.append(bp)
         self.sensor_attribute = sensor_attribute
-    
+
     def run(self):
         self.set_sensor()
-    
+
     def set_sensor(self):
         self.sensor = self._parent.get_world().spawn_actor(
             self.sensor_attribute[-1],
             self._camera_transforms[0],
             attach_to=self._parent)
-            # attachment_type=self._c#amera_transforms[1])
+        # attachment_type=self._c#amera_transforms[1])
         filename = Path(self.args.raw_data_path,
-                        '%s_%d'%(self._parent.type_id, self._parent.id),
-                        '%s_%d'%(self.sensor.type_id, self.sensor.id)
-                    ).as_posix()
+                        "{}_{}".format(self._parent.type_id, self._parent.id),
+                        "{}_{}".format(self._parent.type_id, self._parent.id))
+        filename = filename.as_posix()
+        # '%s_%d'%(self._parent.type_id, self._parent.id),
+        # '%s_%d'%(self.sensor.type_id, self.sensor.id)).as_posix()
         # filename = self.args.raw_data_path + \
         #             self._parent.type_id + '_' + str(self._parent.id) + '/' + \
         #             self.sensor.type_id + '_' + str(self.sensor.id)
-        
+
         weak_self = weakref.ref(self)
         self.sensor.listen(lambda image: CAVcollect_Thread._parse_image(weak_self, image, filename))
         # self.sensor.stop()
         # print(filename)    
-        
 
     def get_sensor_id(self):
         self.join()
         return self.sensor.id
 
-        
     @staticmethod
     def _parse_image(weak_self, image, filename):
         self = weak_self()
         if image.frame % self.args.sample_frequence != 0:
             return
-        if self.sensor.type_id.startswith('sensor.camera'):
+        if self.sensor.type_id == 'sensor.camera.semantic_segmentation':
             image.convert(self.sensor_attribute[1])
-            image.save_to_disk(filename+'/%010d' % image.frame)
+        # elif self.sensor.type_id.startswith('sensor.camera'):
+            # image.convert(self.sensor_attribute[1])
+            image.save_to_disk(filename + '/%010d' % image.frame + '_seg')
         else:
-            image.save_to_disk(filename+'/%010d' % image.frame)
-        
+            image.save_to_disk(filename + '/%010d' % image.frame)
+
 class Scenario(object):
     def __init__(self, args):
         self.client = carla.Client(args.host, args.port)
@@ -334,52 +349,45 @@ class Scenario(object):
         self.CAV_blueprints = self.world.get_blueprint_library().filter('vehicle.tesla.*')
         # sensor information
         self.sensor_attribute = [['sensor.camera.rgb', cc.Raw, 'Camera RGB', {}],
-                                # ['sensor.camera.rgb', cc.Raw, 'Camera RGB', {}],
-                                # ['sensor.camera.rgb', cc.Raw, 'Camera RGB', {}],
-                                # ['sensor.camera.rgb', cc.Raw, 'Camera RGB', {}],
-                                # ['sensor.camera.rgb', cc.Raw, 'Camera RGB', {}],
-                                # ['sensor.camera.semantic_segmentation', cc.CityScapesPalette,'Camera Semantic Segmentation (CityScapes Palette)', {}],
-                                # ['sensor.camera.semantic_segmentation', cc.CityScapesPalette,'Camera Semantic Segmentation (CityScapes Palette)', {}],
-                                # ['sensor.lidar.ray_cast', None, 'Lidar (Ray-Cast)', {}],
-                                ['sensor.lidar.ray_cast', None, 'Lidar (Ray-Cast)', {}]]
+                                 ['sensor.camera.semantic_segmentation', cc.CityScapesPalette,
+                                  'Camera Semantic Segmentation (CityScapes Palette)', {}],
+                                 # ['sensor.camera.semantic_segmentation', cc.CityScapesPalette,'Camera Semantic Segmentation (CityScapes Palette)', {}],
+                                 # ['sensor.lidar.ray_cast', None, 'Lidar (Ray-Cast)', {}],
+                                 ['sensor.lidar.ray_cast', None, 'Lidar (Ray-Cast)', {}]]
         self.sensor_transform = [(carla.Transform(carla.Location(x=0, z=2.5)), Attachment.Rigid),
-                                # (carla.Transform(carla.Location(x=1.6, z=2.5),carla.Rotation(pitch=-10,yaw=90)), Attachment.Rigid),
-                                # (carla.Transform(carla.Location(x=1.6, z=2.5),carla.Rotation(pitch=-10,yaw=180)), Attachment.Rigid),
-                                # (carla.Transform(carla.Location(x=1.6, z=2.5),carla.Rotation(pitch=-10,yaw=270)), Attachment.Rigid),
-                                # (carla.Transform(carla.Location(x=1.6, z=1.7)), Attachment.Rigid),
-                                # (carla.Transform(carla.Location(x=1.6, z=2.5)), Attachment.Rigid),
-                                # (carla.Transform(carla.Location(x=1.6, z=1.7)), Attachment.Rigid),
-                                (carla.Transform(carla.Location(x=0, z=2.5)), Attachment.Rigid)]
+                                 (carla.Transform(carla.Location(x=0, z=2.5)), Attachment.Rigid),
+                                 (carla.Transform(carla.Location(x=0, z=2.5)), Attachment.Rigid)]
         self.args = args
         weak_self = weakref.ref(self)
-        self.world.on_tick(lambda world_snapshot: self.on_world_tick(weak_self,world_snapshot))
+        self.world.on_tick(lambda world_snapshot: self.on_world_tick(weak_self, world_snapshot))
 
     @staticmethod
     def parse_transform(transform):
-        return [transform.location.x,transform.location.y,transform.location.z,transform.rotation.roll,transform.rotation.pitch,transform.rotation.yaw]
+        return [transform.location.x, transform.location.y, transform.location.z, transform.rotation.roll,
+                transform.rotation.pitch, transform.rotation.yaw]
 
     @staticmethod
     def parse_bounding_box(bounding_box):
-        return [bounding_box.extent.x,bounding_box.extent.y,bounding_box.extent.z, bounding_box.location.z]
+        return [bounding_box.extent.x, bounding_box.extent.y, bounding_box.extent.z, bounding_box.location.z]
 
     @staticmethod
     def on_world_tick(weak_self, world_snapshot):
-        self = weak_self()  
+        self = weak_self()
         if world_snapshot.frame % self.args.sample_frequence != 0:
             return
-        if self.args.task == 'replay':# or world_snapshot.frame % 2 == 0:
+        if self.args.task == 'replay':  # or world_snapshot.frame % 2 == 0:
             return
         actors = self.world.get_actors()
         vehicles, sensors, CAV_vehicles = [], [], []
         for actor in actors:
-            str_actor = [str(actor.type_id),actor.id] + Scenario.parse_transform(actor.get_transform())
+            str_actor = [str(actor.type_id), actor.id] + Scenario.parse_transform(actor.get_transform())
             # if 'lidar' in actor.type_id or 'rgb' in actor.type_id:
             #     print(str(actor.type_id),actor.get_transform().rotation.pitch,actor.get_transform().rotation.roll)
             if 'vehicle' in actor.type_id:
                 str_actor += Scenario.parse_bounding_box(actor.bounding_box)
                 vehicles.append(str_actor)
             elif 'sensor' in actor.type_id:
-                str_actor += [0,0,0] + [actor.parent.id]
+                str_actor += [0, 0, 0] + [actor.parent.id]
                 sensors.append(str_actor)
         actors = np.array(vehicles + sensors)
         _label_path = Path(self.args.raw_data_path, 'label')
@@ -387,7 +395,7 @@ class Scenario(object):
         # if not os.path.exists(self.args.raw_data_path+'label'):
         #     os.makedirs(self.args.raw_data_path+'label')
         if len(actors) != 0:
-            _filename = ( _label_path / ('%010d.txt'%(world_snapshot.frame)) ).as_posix()
+            _filename = (_label_path / ('%010d.txt' % (world_snapshot.frame))).as_posix()
             np.savetxt(_filename, actors, fmt='%s', delimiter=' ')
             # np.savetxt(self.args.raw_data_path + '/label/%010d.txt' % world_snapshot.frame, actors, fmt='%s', delimiter=' ')
 
@@ -408,19 +416,20 @@ class Scenario(object):
                 sensor = self.world.get_actor(sensor_id)
                 if 'rgb' in sensor.type_id:
                     sensor.calibration = self.args.calibration
-                    tmp_bboxes = ClientSideBoundingBoxes.get_bounding_boxes(vehicles,sensor)
+                    tmp_bboxes = ClientSideBoundingBoxes.get_bounding_boxes(vehicles, sensor)
                     image_label_path = Path(self.args.raw_data_path,
                                             vehicle.type_id + '_' + str(vehicle.id),
                                             sensor.type_id + '_' + str(sensor.id)
-                                        ).as_posix()
+                                            ).as_posix()
                     # image_label_path = self.args.raw_data_path + \
                     #                     vehicle.type_id + '_' + str(vehicle.id) + '/' + \
                     #                     sensor.type_id + '_' + str(sensor.id)
-                    
-                    if not os.path.exists(image_label_path+'_label'):
-                        os.makedirs(image_label_path+'_label')
+
+                    if not os.path.exists(image_label_path + '_label'):
+                        os.makedirs(image_label_path + '_label')
                     if len(tmp_bboxes) != 0:
-                        np.savetxt(image_label_path+'_label/%010d.txt' % world_snapshot.frame, tmp_bboxes, fmt='%s', delimiter=' ')
+                        np.savetxt(image_label_path + '_label/%010d.txt' % world_snapshot.frame, tmp_bboxes, fmt='%s',
+                                   delimiter=' ')
                     # lidar_to_camera_matrix = ClientSideBoundingBoxes.get_lidar_to_camera_matrix(lidar, sensor)
                     # calib_info.append(lidar_to_camera_matrix)
 
@@ -435,7 +444,7 @@ class Scenario(object):
                 if args.sync and self.synchronous_master:
                     now = self.run_step()
                     if (now - start) % 1000 == 0:
-                        print('Frame ID:'+str(now))
+                        print('Frame ID:' + str(now))
                 else:
                     self.world.wait_for_tick()
         finally:
@@ -445,7 +454,7 @@ class Scenario(object):
                 pass
             self.stop_look(args)
             pass
-    
+
     def start_look(self, args):
         self.synchronous_master = False
         if args.sync:
@@ -459,12 +468,12 @@ class Scenario(object):
             else:
                 self.synchronous_master = False
                 print('synchronous_master is False.')
-        tmpx,tmpy = [],[]
+        tmpx, tmpy = [], []
         for tmp_transform in self.map.initial_spawn_points:
             tmp_location = tmp_transform.location
-            tmpx.append(((tmp_location.x-100)*-1)+100)
+            tmpx.append(((tmp_location.x - 100) * -1) + 100)
             tmpy.append(tmp_location.y)
-        self.map.plot_points(tmpx,tmpy)
+        self.map.plot_points(tmpx, tmpy)
 
     def stop_look(self, args):
         print(args.sync)
@@ -484,19 +493,17 @@ class Scenario(object):
             if not args.sync or not self.synchronous_master:
                 self.world.wait_for_tick()
             else:
-                start = self.world.tick()  
+                start = self.world.tick()
                 if self.dynamic_weather:
                     self.weather.tick(1)
                     self.world.set_weather(self.weather.weather)
                 print('start from frameID: %s.' % start)
             while True:
-                
                 if args.sync and self.synchronous_master:
                     time.sleep(1)
                     now = self.run_step()
                     if (now - start) % 1000 == 0:
-                        print('Frame ID:'+str(now))
-                    #     self.add_anget_and_vehicles()
+                        print('Frame ID:' + str(now))
                 else:
                     self.world.wait_for_tick()
         finally:
@@ -534,7 +541,7 @@ class Scenario(object):
         self.agent_list = []
         self.sensor_relation = {}
         self.sensor_thread = []
-        HD_spawn_points, CAV_spawn_points = self.map.shuffle_spawn_points(self.map.initial_spawn_points,start=True)
+        HD_spawn_points, CAV_spawn_points = self.map.shuffle_spawn_points(self.map.initial_spawn_points, start=True)
         # print(len(CAV_spawn_points))
         self.HD_agents = self.spawn_actorlist('vehicle', self.HD_blueprints, HD_spawn_points)
         print(len(self.HD_agents))
@@ -546,9 +553,9 @@ class Scenario(object):
             settings.synchronous_mode = False
             settings.fixed_delta_seconds = None
             self.world.apply_settings(settings)
-        self.client.apply_batch([carla.command.DestroyActor(x) for x in self.CAV_agents+self.HD_agents])
+        self.client.apply_batch([carla.command.DestroyActor(x) for x in self.CAV_agents + self.HD_agents])
         # self.client.apply_batch([carla.command.DestroyActor(x) for x in self.camera_list])
-        print('\ndestroying %d vehicles' % len(self.CAV_agents+self.HD_agents))
+        print('\ndestroying %d vehicles' % len(self.CAV_agents + self.HD_agents))
         self.sensor_list = []
         for sensor in self.sensor_relation.values():
             self.sensor_list += sensor
@@ -556,20 +563,20 @@ class Scenario(object):
         print('\ndestroying %d sensors' % len(self.sensor_list))
         self.client.stop_recorder()
         print("Stop recording")
-    
+
     def spawn_actorlist(self, actor_type, agent_blueprint=None, spawn_points=None, parent_agent=None):
         bacth_spawn = []
         id_list = []
         if actor_type == 'vehicle':
-            
+
             if not random.choice(agent_blueprint).id.startswith('vehicle.tesla'):
                 # HD_agents
                 # print(len(spawn_points))
                 for n, transform in enumerate(spawn_points):
+                    blueprint = random.choice(agent_blueprint)
+                    while 'tesla' in blueprint.id or 'crossbike' in blueprint.id or 'low_rider' in blueprint.id:
                         blueprint = random.choice(agent_blueprint)
-                        while 'tesla' in blueprint.id or 'crossbike' in blueprint.id or 'low_rider' in blueprint.id:
-                            blueprint = random.choice(agent_blueprint)
-                        bacth_spawn.append(SpawnActor(blueprint, transform).then(SetAutopilot(FutureActor, True)))
+                    bacth_spawn.append(SpawnActor(blueprint, transform).then(SetAutopilot(FutureActor, True)))
                 for response in self.client.apply_batch_sync(bacth_spawn, False):
                     if response.error:
                         print(response.error)
@@ -587,15 +594,18 @@ class Scenario(object):
             elif random.choice(agent_blueprint).id.startswith('vehicle.tesla'):
                 # CAV_agents
                 for n, transform in enumerate(spawn_points):
-                        blueprint = random.choice(agent_blueprint)
-                        bacth_spawn.append(SpawnActor(blueprint, transform).then(SetAutopilot(FutureActor, True)))
+                    blueprint = random.choice(agent_blueprint)
+                    bacth_spawn.append(SpawnActor(blueprint, transform).then(SetAutopilot(FutureActor, True)))
                 for response in self.client.apply_batch_sync(bacth_spawn, True):
                     if response.error:
                         logging.error(response.error)
                     else:
                         id_list.append(response.actor_id)
                         vehicle = self.client.get_world().get_actor(response.actor_id)
-                        tmp_sensor_id_list = self.spawn_actorlist('sensor',self.sensor_attribute,self.sensor_transform,response.actor_id)
+                        tmp_sensor_id_list = self.spawn_actorlist('sensor',
+                                                                  self.sensor_attribute,
+                                                                  self.sensor_transform,
+                                                                  response.actor_id)
                         self.sensor_relation[str(response.actor_id)] = tmp_sensor_id_list
                         random.shuffle(self.map.destination)
                         tmp_agent = Vehicle_Agent(vehicle)
@@ -617,14 +627,14 @@ class Scenario(object):
 
             vehicle = self.world.get_actor(v_id)
             v_position = vehicle.get_transform().location
-            if not(self.map.inROI([v_position.x, v_position.y], self.map.ROI)):
+            if not (self.map.inROI([v_position.x, v_position.y], self.map.ROI)):
                 vehicle.destroy()
                 self.HD_agents.remove(v_id)
-        
+
         for v_id in self.CAV_agents:
             vehicle = self.world.get_actor(v_id)
             v_position = vehicle.get_transform().location
-            if not(self.map.inROI([v_position.x, v_position.y], self.map.ROI)):
+            if not (self.map.inROI([v_position.x, v_position.y], self.map.ROI)):
                 # for agent in self.agent_list:
                 #     if agent.vehicle.id == v_id:
                 #         self.agent_list.remove(agent)
@@ -640,7 +650,7 @@ class Scenario(object):
                 vehicle.destroy()
                 self.CAV_agents.remove(v_id)
 
-    def run_step(self):        
+    def run_step(self):
         batch_control = []
         thread_list = []
         num_min_waypoints = 21
@@ -648,7 +658,8 @@ class Scenario(object):
             t = CAVcontrol_Thread(agent, self.world, self.map.destination, num_min_waypoints, ApplyVehicleControl)
             thread_list.append(t)
         for t in thread_list:
-            batch_control.append(t.return_control())
+            cmd_list = t.return_control()
+            batch_control.append(cmd_list)
         for response in self.client.apply_batch_sync(batch_control, False):
             if response.error:
                 logging.error(response.error)
@@ -657,13 +668,14 @@ class Scenario(object):
         return self.world.tick()
 
     def add_anget_and_vehicles(self):
-        HD_additional_spawn_points,CAV_additional_spawn_points = self.map.shuffle_spawn_points(self.map.additional_spawn_points)
+        HD_additional_spawn_points, CAV_additional_spawn_points = self.map.shuffle_spawn_points(
+            self.map.additional_spawn_points)
         self.HD_agents += self.spawn_actorlist('vehicle', self.HD_blueprints, HD_additional_spawn_points)
         self.CAV_agents += self.spawn_actorlist('vehicle', self.CAV_blueprints, CAV_additional_spawn_points)
 
     def return_cor(self, waypoint):
         location = waypoint.transform.location
-        return [location.x,location.y,location.z]
+        return [location.x, location.y, location.z]
 
     def get_road(self, world_map):
         WAYPOINT_DISTANCE = 10
@@ -688,14 +700,14 @@ class Scenario(object):
                     # return multiple waypoints in intersections.
                     current_wp = available_next_wps[0]
                     wps_in_single_road.append(self.return_cor(current_wp))
-                else: # If there is no more waypoints we can stop searching for more.
+                else:  # If there is no more waypoints we can stop searching for more.
                     break
             pcd1 = o3d.geometry.PointCloud()
             pdc2 = o3d.geometry.PointCloud()
             pcd1.points = o3d.utility.Vector3dVector(wps_in_single_road[:-1])
             pdc2.points = o3d.utility.Vector3dVector(wps_in_single_road[1:])
-            corr = [(i,i+1) for i in range(len(wps_in_single_road)-2)]
-            lineset = o3d.geometry.LineSet.create_from_point_cloud_correspondences(pcd1,pdc2,corr)
+            corr = [(i, i + 1) for i in range(len(wps_in_single_road) - 2)]
+            lineset = o3d.geometry.LineSet.create_from_point_cloud_correspondences(pcd1, pdc2, corr)
             lineset.paint_uniform_color(np.array([0.5, 0.5, 0.5]))
             road_list.append(lineset)
         return road_list
@@ -708,7 +720,7 @@ class Scenario(object):
         try:
             start_time = time.time()
             replay_time = self.start_replay(args)
-            while time.time()-start_time < replay_time:
+            while time.time() - start_time < replay_time:
                 self.world.tick()
         finally:
             print('stop replay...')
@@ -717,26 +729,26 @@ class Scenario(object):
             pass
 
     def start_replay(self, args):
-        settings = self.world.get_settings()        
-        settings.synchronous_mode = True        
+        settings = self.world.get_settings()
+        settings.synchronous_mode = True
         settings.fixed_delta_seconds = args.fixed_delta_seconds
         self.world.apply_settings(settings)
 
-         # set the time factor for the replayer
+        # set the time factor for the replayer
         self.client.set_replayer_time_factor(args.time_factor)
 
-         # replay the session
+        # replay the session
         output = self.client.replay_file(args.recorder_filename, args.start, args.duration, args.camera)
         replay_time = self.find_replay_time(output, args.duration)
         print('start replay...{}'.format(str(output)))
         return replay_time
 
     def stop_replay(self, args):
-        actor_list =[]
+        actor_list = []
         for actor in self.world.get_actors().filter('vehicle.*'):
             actor_list.append(actor.id)
         self.client.apply_batch([carla.command.DestroyActor(x) for x in actor_list])
-        if self.args.sync:# and synchronous_master:
+        if self.args.sync:  # and synchronous_master:
             settings = self.world.get_settings()
             settings.synchronous_mode = False
             settings.fixed_delta_seconds = None
@@ -747,8 +759,8 @@ class Scenario(object):
         exit()
 
     def find_replay_time(self, output, duration):
-        index_start = output.index('-')+2
-        index_end = output.index('(')-2
+        index_start = output.index('-') + 2
+        index_end = output.index('(') - 2
         total_time = float(output[index_start:index_end])
         if duration == 0:
             return total_time
