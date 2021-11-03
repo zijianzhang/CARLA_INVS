@@ -48,7 +48,6 @@ except IndexError:
     pass
 
 from agents.navigation.behavior_agent import BehaviorAgent  # pylint: disable=import-error
-from agents.navigation.roaming_agent import RoamingAgent  # pylint: disable=import-error
 from agents.navigation.basic_agent import BasicAgent  # pylint: disable=import-error
 
 from utils.get2Dlabel import ClientSideBoundingBoxes
@@ -83,6 +82,7 @@ class Args(object):
         # self.fixed_delta_seconds = 0.1
         # agent information
         self.agent = 'BehaviorAgent'
+
         # record information
         self.sync = True
         self.time = time.strftime("%Y_%m%d_%H%M", time.localtime())
@@ -233,12 +233,7 @@ class CAVcontrol_Thread(Thread):
     def run(self):                      
         #   把要执行的代码写到run函数里面 线程在创建后会直接运行run函数 
         self.control = None
-        self.v.update_information(self.w)
-        if len(self.v.get_local_planner().waypoints_queue) < self.n:
-            self.v.reroute(self.d)
-        speed_limit = self.v.vehicle.get_speed_limit()
-        self.v.get_local_planner().set_speed(speed_limit)
-        self.control = self.c(self.v.vehicle.id, self.v.run_step())
+        self.control = self.c(self.v._vehicle.id, self.v.run_step())
 
     def return_control(self):           
         #   threading.Thread.join(self) # 等待线程执行完毕
@@ -329,6 +324,11 @@ class Scenario(object):
         self.traffic_manager = self.client.get_trafficmanager(args.tm_port)
         self.map = Map(args)
         self.recording_rawdata = False
+
+        self.agent_list = []
+        self.sensor_relation = {}
+        self.sensor_thread = []
+
         # agent information
         self.HD_blueprints = self.world.get_blueprint_library().filter('vehicle.*')
         self.CAV_blueprints = self.world.get_blueprint_library().filter('vehicle.tesla.*')
@@ -480,6 +480,7 @@ class Scenario(object):
         self.recording_rawdata = True
         try:
             self.start_record(args)
+            print(args.sync)
             if not args.sync or not self.synchronous_master:
                 self.world.wait_for_tick()
             else:
@@ -598,7 +599,7 @@ class Scenario(object):
                         self.sensor_relation[str(response.actor_id)] = tmp_sensor_id_list
                         random.shuffle(self.map.destination)
                         tmp_agent = Vehicle_Agent(vehicle)
-                        tmp_agent.set_destination(tmp_agent.vehicle.get_location(), self.map.destination[0].location, clean=True)
+                        tmp_agent.set_destination(self.map.destination[0].location)
                         self.agent_list.append(tmp_agent)
         elif actor_type == 'sensor':
             # sensor agents
@@ -640,17 +641,17 @@ class Scenario(object):
                 self.CAV_agents.remove(v_id)
 
     def run_step(self):        
-        # batch_control = []
-        # thread_list = []
-        # num_min_waypoints = 21
-        # for agent in self.agent_list:
-        #     t = CAVcontrol_Thread(agent, self.world, self.map.destination, num_min_waypoints, ApplyVehicleControl)
-        #     thread_list.append(t)
-        # for t in thread_list:
-        #     batch_control.append(t.return_control())
-        # for response in self.client.apply_batch_sync(batch_control, False):
-        #     if response.error:
-        #         logging.error(response.error)
+        batch_control = []
+        thread_list = []
+        num_min_waypoints = 21
+        for agent in self.agent_list:
+            t = CAVcontrol_Thread(agent, self.world, self.map.destination, num_min_waypoints, ApplyVehicleControl)
+            thread_list.append(t)
+        for t in thread_list:
+            batch_control.append(t.return_control())
+        for response in self.client.apply_batch_sync(batch_control, False):
+            if response.error:
+                logging.error(response.error)
         if not self.map.pretrain_model:
             self.check_vehicle_state()
         return self.world.tick()

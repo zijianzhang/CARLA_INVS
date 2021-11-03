@@ -1,10 +1,19 @@
 #!/usr/bin/env python3
 from pathlib import Path
 from os import chdir
+import os
 
-CARLA_PATH = Path('~/CARLA_0.9.10').expanduser() #Path('~/CARLA').expanduser()
+# Get CARLA Root Path
+CARLA_PATH = os.environ.get('CARLA_ROOT')
+if len(CARLA_PATH) == 0:
+    CARLA_PATH = CARLA_PATH = os.environ.get('CARLA_PATH')
+    if len(CARLA_PATH) == 0:
+        CARLA_PATH = Path('~/carla').expanduser() #Path('~/CARLA').expanduser()
+print("CARLA_PATH: {}".format(CARLA_PATH))
+
+# Project Root Path
 ROOT_PATH  = Path(__file__).parent
-
+print("Project Root PATH: {}".format(ROOT_PATH))
 ##for gen_data
 LOG_PATH   = ROOT_PATH / 'log'
 RAW_DATA_PATH  = ROOT_PATH / 'raw_data'

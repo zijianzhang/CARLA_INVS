@@ -92,8 +92,6 @@ RUN sed -i "s@~/CARLA_0.9.10@/home/carla@g" /home/carla/PythonAPI/CARLA_INVS/par
 WORKDIR  /home/carla/PythonAPI/CARLA_INVS
 # export PYTHONPATH=$PYTHONPATH:/home/carla/PythonAPI/carla/dist/carla-0.9.10-py3.7-linux-x86_64.egg
 
-
-
 ENV NVIDIA_VISIBLE_DEVICES \
     ${NVIDIA_VISIBLE_DEVICES:-all}
 ENV NVIDIA_DRIVER_CAPABILITIES \
