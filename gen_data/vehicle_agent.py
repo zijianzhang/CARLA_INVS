@@ -116,8 +116,7 @@ class CAVcollect_Thread(Thread):
             carla_image_data_array = numpy.ndarray(
                 shape=(image.height, image.width, 4),
                 dtype=numpy.uint8, buffer=image.raw_data)
-            with open(filename + '/seg' + '/%010d' % image.frame + '.raw', 'wb') as f:
-                numpy.save(f, carla_image_data_array)
+            numpy.savez_compressed(filename + '/seg' + '/%010d' % image.frame, a=carla_image_data_array)
 
         # elif self.sensor.type_id == 'sensor.camera.depth':
         #     image.convert(self.sensor_attribute[1])

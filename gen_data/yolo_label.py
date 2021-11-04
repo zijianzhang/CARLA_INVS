@@ -27,21 +27,17 @@ class YoloLabel:
 
     def process(self):
         img_path_list = glob.glob(self.data_path+'/*.png')
-        img_seg_path_list = glob.glob(self.data_path + '/seg' + '/*.raw')
+        img_seg_path_list = glob.glob(self.data_path + '/seg' + '/*.npz')
         for rgb_img, seg_img in zip(img_path_list, img_seg_path_list):
             self.label_img(rgb_img, seg_img)
 
     def label_img(self, rgb_img_path, seg_img_path):
         self.image_rgb = cv2.imread(rgb_img_path, cv2.IMREAD_COLOR)
-        # self.image_seg = cv2.imread(seg_img_path, cv2.IMREAD_UNCHANGED)
-        with open(seg_img_path, 'rb') as f:
-            self.image_seg = np.load(f)
+        self.image_seg = (np.load(seg_img_path))['a']
         self.image_seg = cv2.cvtColor(self.image_seg, cv2.COLOR_BGRA2RGB)
-        print(self.image_seg.shape)
         if self.image_seg is None or self.image_seg is None:
             return
         img_name = os.path.basename(rgb_img_path)
-        print(img_name)
         height, width, _ = self.image_rgb.shape
 
         mask = (self.image_seg == (250, 170, 30))
@@ -84,13 +80,15 @@ class YoloLabel:
         if len(labels) > 0:
             os.makedirs(self.label_out_path, exist_ok=True)
             os.makedirs(self.image_out_path, exist_ok=True)
-            print(self.image_out_path)
+            print("image\t\t\twidth\theight\n{}\t{}\t{}".format(img_name, width, height))
+            print("Got {} labels".format(len(labels)))
             cv2.imwrite(self.image_out_path.as_posix()+'/'+img_name, self.image_rgb)
             with open(self.label_out_path.as_posix()+'/'+os.path.splitext(img_name)[0]+'.txt', "w") as f:
                 for label in labels:
-                    print(label)
+                    # print(label)
                     f.write(label)
                     f.write('\n')
+            print("******")
             return
 
     def decrease_brightness(self, img, value=30):
@@ -141,6 +139,7 @@ class YoloLabel:
         else:
             return LABEL_ID.TRAFFIC_LIGHT
 
+
 if __name__ == '__main__':
-    yolo_label_manager = YoloLabel("/home/kevinlad/carla1s/carla/PythonAPI/CARLA_INVS/raw_data/record2021_1104_2135/vehicle.tesla.cybertruck_1276/vehicle.tesla.cybertruck_1276")
+    yolo_label_manager = YoloLabel("/home/kevinlad/carla1s/carla/PythonAPI/CARLA_INVS/raw_data/record2021_1104_2356/vehicle.tesla.cybertruck_608/vehicle.tesla.cybertruck_608")
     yolo_label_manager.process()
