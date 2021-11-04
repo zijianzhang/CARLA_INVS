@@ -7,8 +7,8 @@ import shutil
 import glob
 # amend relative import
 from pathlib import Path
-sys.path.append( Path(__file__).resolve().parent.parent.as_posix() ) #repo path
-sys.path.append( Path(__file__).resolve().parent.as_posix() ) #file path
+sys.path.append(Path(__file__).resolve().parent.parent.as_posix() ) #repo path
+sys.path.append(Path(__file__).resolve().parent.as_posix() ) #file path
 from params import *
 
 try:

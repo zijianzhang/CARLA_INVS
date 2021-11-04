@@ -8,7 +8,7 @@ CARLA_PATH = os.environ.get('CARLA_ROOT')
 if len(CARLA_PATH) == 0:
     CARLA_PATH = CARLA_PATH = os.environ.get('CARLA_PATH')
     if len(CARLA_PATH) == 0:
-        CARLA_PATH = Path('~/carla').expanduser() #Path('~/CARLA').expanduser()
+        CARLA_PATH = Path('~/carla').expanduser()
 print("CARLA_PATH: {}".format(CARLA_PATH))
 
 # Project Root Path
