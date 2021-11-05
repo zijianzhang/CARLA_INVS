@@ -39,7 +39,7 @@ except IndexError:
     pass
 
 
-from vehicle_agent import VehicleAgent, CAVcollect_Thread, CAVcontrol_Thread
+from vehicle_agent import VehicleAgent, CavCollectThread, CavControlThread
 from utils.get2Dlabel import ClientSideBoundingBoxes
 
 
@@ -97,9 +97,9 @@ class Args(object):
         # raw data information
         self.raw_data_path = RAW_DATA_PATH / ('record' + self.time)
         # self.raw_data_path = 'tmp/record' + self.time + '/'
-        self.image_width = 1242
-        self.image_height = 375
-        self.VIEW_FOV = 90
+        self.image_width = 1280
+        self.image_height = 720
+        self.VIEW_FOV = 60
 
         self.calibration = np.identity(3)
         self.calibration[0, 2] = self.image_width / 2.0
@@ -222,7 +222,7 @@ class Scenario(object):
 
         # agent information
         self.HD_blueprints = self.world.get_blueprint_library().filter('vehicle.*')
-        self.CAV_blueprints = self.world.get_blueprint_library().filter('vehicle.tesla.*')
+        self.CAV_blueprints = self.world.get_blueprint_library().filter('vehicle.tesla.model3')
         # sensor information
         self.sensor_attribute = [['sensor.camera.rgb', carla.ColorConverter.Raw, 'Camera RGB', {}],
                                  ['sensor.camera.semantic_segmentation', carla.ColorConverter.CityScapesPalette,
@@ -376,9 +376,9 @@ class Scenario(object):
                 print('start from frameID: %s.' % start)
             while True:
                 if args.sync and self.synchronous_master:
-                    time.sleep(1)
+                    time.sleep(0.1)
                     now = self.run_step()
-                    if (now - start) % 1000 == 0:
+                    if (now - start) % 10 == 0:
                         print('Frame ID:' + str(now))
                 else:
                     self.world.wait_for_tick()
@@ -492,7 +492,7 @@ class Scenario(object):
             for index in range(len(self.sensor_attribute)):
                 sensor_attribute = self.sensor_attribute[index]
                 transform = self.sensor_transform[index]
-                tmp_sensor = CAVcollect_Thread(parent_agent, sensor_attribute, transform, self.args)
+                tmp_sensor = CavCollectThread(parent_agent, sensor_attribute, transform, self.args)
                 tmp_sensor.start()
                 self.sensor_thread.append(tmp_sensor)
                 id_list.append(tmp_sensor.get_sensor_id())
@@ -531,7 +531,7 @@ class Scenario(object):
         thread_list = []
         num_min_waypoints = 21
         for agent in self.agent_list:
-            t = CAVcontrol_Thread(agent, self.world, self.map.destination, num_min_waypoints, ApplyVehicleControl)
+            t = CavControlThread(agent, self.world, self.map.destination, num_min_waypoints, ApplyVehicleControl)
             thread_list.append(t)
         for t in thread_list:
             cmd_list = t.return_control()

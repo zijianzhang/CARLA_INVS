@@ -1,9 +1,11 @@
 #!/usr/bin/python3
+from params import *
 import os
 from pathlib import Path
 import cv2
 import numpy as np
 import glob
+import yaml
 
 TRAFFIC_LIGHT_SEG_COLOR = (250, 170, 30)
 
@@ -19,11 +21,15 @@ class YoloLabel:
     def __init__(self, data_path):
         self.data_path = data_path
         self.data_output_path = Path(data_path) / "../yolo_dataset"
-        self.image_out_path = self.data_output_path / "images"
-        self.label_out_path = self.data_output_path / "labels"
+        self.data_output_path = Path(os.path.abspath(self.data_output_path.as_posix()))
+        print(self.data_output_path)
+        self.image_out_path = self.data_output_path / "images" / "train"
+        self.label_out_path = self.data_output_path / "labels" / "train"
         self.image_rgb = None
         self.image_seg = None
         self.preview_img = None
+        self.rec_pixels_min = 60
+        self.color_pixels_min = 30
 
     def process(self):
         img_path_list = glob.glob(self.data_path+'/*.png')
@@ -34,9 +40,10 @@ class YoloLabel:
     def label_img(self, rgb_img_path, seg_img_path):
         self.image_rgb = cv2.imread(rgb_img_path, cv2.IMREAD_COLOR)
         self.image_seg = (np.load(seg_img_path))['a']
-        self.image_seg = cv2.cvtColor(self.image_seg, cv2.COLOR_BGRA2RGB)
-        if self.image_seg is None or self.image_seg is None:
+        if self.image_rgb is None or self.image_seg is None:
             return
+        self.image_rgb = cv2.cvtColor(self.image_rgb, cv2.COLOR_RGBA2RGB)
+        self.image_seg = cv2.cvtColor(self.image_seg, cv2.COLOR_BGRA2RGB)
         img_name = os.path.basename(rgb_img_path)
         height, width, _ = self.image_rgb.shape
 
@@ -44,8 +51,8 @@ class YoloLabel:
         tmp_mask = (mask.sum(axis=2, dtype=np.uint8) == 3)
         mono_img = np.array(tmp_mask * 255, dtype=np.uint8)
 
-        self.preview_img = self.image_rgb
-        # self.preview_img = self.image_seg
+        # self.preview_img = self.image_rgb
+        self.preview_img = self.image_seg
         # cv2.imshow("seg", self.preview_img)
         # cv2.imshow("mono", mono_img)
         # cv2.waitKey()
@@ -53,7 +60,7 @@ class YoloLabel:
         labels = []
         for cnt in contours:
             x, y, w, h = cv2.boundingRect(cnt)
-            if w * h < 30:
+            if w * h < self.rec_pixels_min:
                 continue
             # cv2.rectangle(self.preview_img, (x, y), (x + w, y + h), (0, 255, 0), 1)
             # cv2.imshow("rect", self.preview_img)
@@ -82,14 +89,42 @@ class YoloLabel:
             os.makedirs(self.image_out_path, exist_ok=True)
             print("image\t\t\twidth\theight\n{}\t{}\t{}".format(img_name, width, height))
             print("Got {} labels".format(len(labels)))
-            cv2.imwrite(self.image_out_path.as_posix()+'/'+img_name, self.image_rgb)
+            cv2.imwrite(self.image_out_path.as_posix()+'/'+os.path.splitext(img_name)[0]+'.jpg', self.image_rgb.astype(np.float32))
+            print(self.image_rgb.shape, type(self.image_rgb.dtype))
             with open(self.label_out_path.as_posix()+'/'+os.path.splitext(img_name)[0]+'.txt', "w") as f:
                 for label in labels:
-                    # print(label)
                     f.write(label)
                     f.write('\n')
+            print("Label output path: {}".format(self.label_out_path))
+            self.dump_yaml(self.data_output_path.as_posix())
             print("******")
             return
+
+    def dump_yaml(self, dataset_path):
+
+        coco_names = ['person', 'bicycle', 'car', 'motorcycle', 'airplane', 'bus', 'train', 'truck', 'boat',
+                      'traffic light', 'fire hydrant', 'stop sign', 'parking meter', 'bench', 'bird', 'cat', 'dog',
+                      'horse', 'sheep', 'cow', 'elephant', 'bear', 'zebra', 'giraffe', 'backpack', 'umbrella',
+                      'handbag', 'tie', 'suitcase', 'frisbee', 'skis', 'snowboard', 'sports ball', 'kite',
+                      'baseball bat', 'baseball glove', 'skateboard', 'surfboard',
+                      'tennis racket', 'bottle', 'wine glass', 'cup', 'fork', 'knife', 'spoon', 'bowl', 'banana', 'apple',
+                      'sandwich', 'orange', 'broccoli', 'carrot', 'hot dog', 'pizza', 'donut', 'cake', 'chair', 'couch',
+                      'potted plant', 'bed', 'dining table', 'toilet', 'tv', 'laptop', 'mouse', 'remote', 'keyboard', 'cell phone',
+                      'microwave', 'oven', 'toaster', 'sink', 'refrigerator', 'book', 'clock', 'vase', 'scissors', 'teddy bear',
+                      'hair drier', 'toothbrush', 'traffic light red', 'traffic light yellow', 'traffic light green']
+        dict_file = {
+                     'path' : dataset_path,
+                     'train' : 'images/train',
+                     'val': 'images/train',
+                     'test': '',
+                     'nc': len(coco_names),
+                     'names': coco_names
+                    }
+        with open(dataset_path+'/yolo_coco_carla.yaml', 'w') as file:
+            yaml.dump(dict_file, file)
+        # with open(dataset_path + '/yolo_coco_carla.yaml', 'r') as file:
+        #     t = yaml.safe_load(file)
+        #     print(t)
 
     def decrease_brightness(self, img, value=30):
         h, s, v = cv2.split(img)
@@ -127,7 +162,7 @@ class YoloLabel:
         green = cv2.countNonZero(green_blur)
 
         light_color = max(red, green, yellow)
-        if light_color > 20:
+        if light_color > self.color_pixels_min:
             if light_color == red:
                 return LABEL_ID.TRAFFIC_LIGHT_RED
             elif light_color == yellow:
@@ -141,5 +176,10 @@ class YoloLabel:
 
 
 if __name__ == '__main__':
-    yolo_label_manager = YoloLabel("/home/kevinlad/carla1s/carla/PythonAPI/CARLA_INVS/raw_data/record2021_1104_2356/vehicle.tesla.cybertruck_608/vehicle.tesla.cybertruck_608")
-    yolo_label_manager.process()
+    raw_data_path = RAW_DATA_PATH
+    record_id = "record"+"2021_1105_1938"
+    data_path = raw_data_path / record_id
+    vehicle_data_list = glob.glob(data_path.as_posix() + '/vehicle*' + '/vehicle*')
+    for vehicle_data_path in vehicle_data_list:
+        yolo_label_manager = YoloLabel(vehicle_data_path)
+        yolo_label_manager.process()

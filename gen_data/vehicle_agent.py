@@ -15,7 +15,7 @@ class VehicleAgent(BehaviorAgent):
         BehaviorAgent.__init__(self, vehicle)
 
 
-class CAVcontrol_Thread(Thread):
+class CavControlThread(Thread):
     #   继承父类threading.Thread
     def __init__(self, vehicle_agent: VehicleAgent, world, destination, num_min_waypoints, apply_vehicle_control):
         Thread.__init__(self)
@@ -43,13 +43,12 @@ class CAVcontrol_Thread(Thread):
             print('This is an issue')
 
 
-class CAVcollect_Thread(Thread):
+class CavCollectThread(Thread):
     def __init__(self, parent_id, sensor_attribute, sensor_transform, args):
         Thread.__init__(self)
         self.recording = False
         self.args = args
         gamma_correction = 2.2
-        Attachment = carla.AttachmentType
         self.client = carla.Client(self.args.host, self.args.port)
         world = self.client.get_world()
         self.sensor = None
@@ -65,9 +64,12 @@ class CAVcollect_Thread(Thread):
             for attr_name, attr_value in sensor_attribute[3].items():
                 bp.set_attribute(attr_name, attr_value)
         elif sensor_attribute[0].startswith('sensor.lidar'):
-            bp.set_attribute('range', '100')
-            bp.set_attribute('channels', '64')
-            bp.set_attribute('points_per_second', '2240000')
+            bp.set_attribute('range', '10')
+            bp.set_attribute('channels', '16')
+            bp.set_attribute('points_per_second', '22400')
+            # bp.set_attribute('range', '100')
+            # bp.set_attribute('channels', '64')
+            # bp.set_attribute('points_per_second', '2240000')
             bp.set_attribute('rotation_frequency', '20')
             bp.set_attribute('sensor_tick', str(0.05))
             bp.set_attribute('dropoff_general_rate', '0.0')
@@ -97,7 +99,7 @@ class CAVcollect_Thread(Thread):
         #             self.sensor.type_id + '_' + str(self.sensor.id)
 
         weak_self = weakref.ref(self)
-        self.sensor.listen(lambda image: CAVcollect_Thread._parse_image(weak_self, image, filename))
+        self.sensor.listen(lambda image: CavCollectThread._parse_image(weak_self, image, filename))
         # self.sensor.stop()
         # print(filename)
 
