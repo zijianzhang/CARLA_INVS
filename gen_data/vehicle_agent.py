@@ -1,13 +1,16 @@
 #!/usr/bin/python3
 import sys
-import pathlib as Path
-
-from threading import Thread
 from pathlib import Path
+sys.path.append(Path(__file__).resolve().parent.parent.as_posix() ) #repo path
+sys.path.append(Path(__file__).resolve().parent.as_posix() ) #file path
+from threading import Thread
+
 import carla
 import weakref
 import numpy
 from agents.navigation.behavior_agent import BehaviorAgent  # pylint: disable=import-error
+
+from params import *
 
 class VehicleAgent(BehaviorAgent):
     def __init__(self, vehicle):
@@ -110,6 +113,8 @@ class CavCollectThread(Thread):
     @staticmethod
     def _parse_image(weak_self, image, filename):
         self = weak_self()
+        if image.frame < RAW_DATA_START or image.frame > RAW_DATA_END:
+            return
         if image.frame % self.args.sample_frequence != 0:
             return
         if self.sensor.type_id == 'sensor.camera.semantic_segmentation':

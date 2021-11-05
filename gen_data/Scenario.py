@@ -347,7 +347,8 @@ class Scenario(object):
         tmpx, tmpy = [], []
         for tmp_transform in self.map.initial_spawn_points:
             tmp_location = tmp_transform.location
-            tmpx.append(((tmp_location.x - 100) * -1) + 100)
+            tmpx.append(tmp_location.x)
+            # tmpx.append(((tmp_location.x - 100) * -1) + 100)
             tmpy.append(tmp_location.y)
         self.map.plot_points(tmpx, tmpy)
 
@@ -376,7 +377,7 @@ class Scenario(object):
                 print('start from frameID: %s.' % start)
             while True:
                 if args.sync and self.synchronous_master:
-                    time.sleep(0.1)
+                    time.sleep(1)
                     now = self.run_step()
                     if (now - start) % 10 == 0:
                         print('Frame ID:' + str(now))
