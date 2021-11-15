@@ -50,7 +50,13 @@ class Args(object):
         self.port = 2000
         self.tm_port = 8000
         self.time_out = 10.0
+
+        # For sync mode
+        # Make sure fixed_delta_seconds <= max_substep_delta_time * max_substeps
         self.fixed_delta_seconds = 0.05
+        self.substepping = True
+        self.max_substep_delta_time = 0.01
+        self.max_substeps = 10
 
         # map information
         self.map_name = TOWN_MAP
@@ -377,7 +383,8 @@ class Scenario(object):
                 print('start from frameID: %s.' % start)
             while True:
                 if args.sync and self.synchronous_master:
-                    time.sleep(1)
+                    # time.sleep(1)
+                    time.sleep(0.1)
                     now = self.run_step()
                     if (now - start) % 10 == 0:
                         print('Frame ID:' + str(now))
@@ -405,8 +412,13 @@ class Scenario(object):
             if not settings.synchronous_mode:
                 self.synchronous_master = True
                 self.traffic_manager.set_synchronous_mode(True)
+                settings = carla.WorldSettings()
                 settings.synchronous_mode = True
                 settings.fixed_delta_seconds = args.fixed_delta_seconds
+                settings.substepping = args.substepping
+                settings.max_substep_delta_time = args.max_substep_delta_time
+                settings.max_substeps = args.max_substeps
+
                 self.world.apply_settings(settings)
             else:
                 self.synchronous_master = False
@@ -542,7 +554,10 @@ class Scenario(object):
                 logging.error(response.error)
         if not self.map.pretrain_model:
             self.check_vehicle_state()
-        return self.world.tick()
+        tick = self.world.tick()
+        for t in self.sensor_thread:
+            t.save_to_disk()
+        return tick
 
     def add_anget_and_vehicles(self):
         HD_additional_spawn_points, CAV_additional_spawn_points = self.map.shuffle_spawn_points(

@@ -9,7 +9,7 @@ import carla
 import weakref
 import numpy
 from agents.navigation.behavior_agent import BehaviorAgent  # pylint: disable=import-error
-
+from queue import Queue
 from params import *
 
 class VehicleAgent(BehaviorAgent):
@@ -81,6 +81,7 @@ class CavCollectThread(Thread):
             # bp.set_attribute('noise_stddev', '0.0')
         sensor_attribute.append(bp)
         self.sensor_attribute = sensor_attribute
+        self.data_queue = Queue()
 
     def run(self):
         self.set_sensor()
@@ -102,31 +103,37 @@ class CavCollectThread(Thread):
         #             self.sensor.type_id + '_' + str(self.sensor.id)
 
         weak_self = weakref.ref(self)
-        self.sensor.listen(lambda image: CavCollectThread._parse_image(weak_self, image, filename))
+        self.sensor.listen(lambda sensor_data: CavCollectThread.data_callback(weak_self, sensor_data, filename, self.data_queue))
         # self.sensor.stop()
         # print(filename)
+
+    @staticmethod
+    def data_callback(weak_self, data, filename, data_queue: Queue):
+        data_queue.put((data, filename))
 
     def get_sensor_id(self):
         self.join()
         return self.sensor.id
 
-    @staticmethod
-    def _parse_image(weak_self, image, filename):
-        self = weak_self()
-        if image.frame < RAW_DATA_START or image.frame > RAW_DATA_END:
-            return
-        if image.frame % self.args.sample_frequence != 0:
+    def save_to_disk(self):
+        sensor_frame = self.data_queue.get(True, 1.0)
+        sensor_data = sensor_frame[0]
+        filename = sensor_frame[1]
+        # if sensor_data.frame < RAW_DATA_START or sensor_data.frame > RAW_DATA_END:
+        #     return
+        if sensor_data.frame % self.args.sample_frequence != 0:
             return
         if self.sensor.type_id == 'sensor.camera.semantic_segmentation':
-            image.convert(self.sensor_attribute[1])
-            image.save_to_disk(filename + '/seg' + '/%010d' % image.frame)
+            sensor_data.convert(self.sensor_attribute[1])
+            # sensor_data.save_to_disk(filename + '/seg' + '/%010d' % sensor_data.frame)
             carla_image_data_array = numpy.ndarray(
-                shape=(image.height, image.width, 4),
-                dtype=numpy.uint8, buffer=image.raw_data)
-            numpy.savez_compressed(filename + '/seg' + '/%010d' % image.frame, a=carla_image_data_array)
-
+                shape=(sensor_data.height, sensor_data.width, 4),
+                dtype=numpy.uint8, buffer=sensor_data.raw_data)
+            os.makedirs(filename + '/seg', exist_ok=True)
+            numpy.savez_compressed(filename + '/seg' + '/%010d' % sensor_data.frame, a=carla_image_data_array)
         # elif self.sensor.type_id == 'sensor.camera.depth':
-        #     image.convert(self.sensor_attribute[1])
-        #     image.save_to_disk(filename + '/%010d' % image.frame + '_depth')
+        #     sensor_data.convert(self.sensor_attribute[1])
+        #     sensor_data.save_to_disk(filename + '/%010d' % sensor_data.frame + '_depth')
         else:
-            image.save_to_disk(filename + '/%010d' % image.frame)
+            sensor_data.save_to_disk(filename + '/%010d' % sensor_data.frame)
+
