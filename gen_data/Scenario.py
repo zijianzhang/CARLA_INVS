@@ -370,6 +370,7 @@ class Scenario(object):
 
     def generate_data(self, args):
         self.recording_rawdata = True
+        loop_status = True
         try:
             self.start_record(args)
             print(args.sync)
@@ -381,7 +382,7 @@ class Scenario(object):
                     self.weather.tick(1)
                     self.world.set_weather(self.weather.weather)
                 print('start from frameID: %s.' % start)
-            while True:
+            while loop_status:
                 if args.sync and self.synchronous_master:
                     # time.sleep(1)
                     time.sleep(0.1)
@@ -390,6 +391,8 @@ class Scenario(object):
                         print('Frame ID:' + str(now))
                 else:
                     self.world.wait_for_tick()
+        except KeyboardInterrupt:
+            loop_status = False
         finally:
             try:
                 print('stop from frameID: %s.' % now)
