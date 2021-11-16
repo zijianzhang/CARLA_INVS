@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+import copy
 import sys
 from pathlib import Path
 sys.path.append(Path(__file__).resolve().parent.parent.as_posix() ) #repo path
@@ -47,93 +48,105 @@ class CavControlThread(Thread):
 
 
 class CavCollectThread(Thread):
-    def __init__(self, parent_id, sensor_attribute, sensor_transform, args):
+    def __init__(self, parent_id, sensor_attribute_list, sensor_transform_list, args):
         Thread.__init__(self)
         self.recording = False
-        self.args = args
-        gamma_correction = 2.2
-        self.client = carla.Client(self.args.host, self.args.port)
-        world = self.client.get_world()
-        self.sensor = None
-        self._parent = world.get_actor(parent_id)
-        self._camera_transforms = sensor_transform  # (sensor_transform, Attachment.Rigid)
-        bp_library = world.get_blueprint_library()
-        bp = bp_library.find(sensor_attribute[0])
-        if sensor_attribute[0].startswith('sensor.camera'):
-            bp.set_attribute('image_size_x', str(self.args.image_width))
-            bp.set_attribute('image_size_y', str(self.args.image_height))
-            if bp.has_attribute('gamma'):
-                bp.set_attribute('gamma', str(gamma_correction))
-            for attr_name, attr_value in sensor_attribute[3].items():
-                bp.set_attribute(attr_name, attr_value)
-        elif sensor_attribute[0].startswith('sensor.lidar'):
-            bp.set_attribute('range', '10')
-            bp.set_attribute('channels', '16')
-            bp.set_attribute('points_per_second', '22400')
-            # bp.set_attribute('range', '100')
-            # bp.set_attribute('channels', '64')
-            # bp.set_attribute('points_per_second', '2240000')
-            bp.set_attribute('rotation_frequency', '20')
-            bp.set_attribute('sensor_tick', str(0.05))
-            bp.set_attribute('dropoff_general_rate', '0.0')
-            bp.set_attribute('dropoff_intensity_limit', '1.0')
-            bp.set_attribute('dropoff_zero_intensity', '0.0')
-            # bp.set_attribute('noise_stddev', '0.0')
-        sensor_attribute.append(bp)
-        self.sensor_attribute = sensor_attribute
         self.data_queue = Queue()
+        self.args = args
+        self.client = carla.Client(self.args.host, self.args.port)
+        self.world = self.client.get_world()
+
+        self._parent = self.world.get_actor(parent_id)
+
+        self.sensors_transforms = sensor_transform_list  # (sensor_transform, Attachment.Rigid)
+        self.sensors_attribute_list = sensor_attribute_list
+        self.sensor_attribute = None
+        self.sensor_id_list = []
+        self.sensor_list = []
 
     def run(self):
-        self.set_sensor()
+        self.spawn_sensors()
 
-    def set_sensor(self):
-        self.sensor = self._parent.get_world().spawn_actor(
-            self.sensor_attribute[-1],
-            self._camera_transforms[0],
-            attach_to=self._parent)
-        # attachment_type=self._c#amera_transforms[1])
+    def spawn_sensors(self):
+        for i in range(len(self.sensors_attribute_list)):
+            sensor_attribute_raw = self.sensors_attribute_list[i]
+            sensor_transform = self.sensors_transforms[i]
+        # for sensor_attribute_raw, sensor_transform in zip(self.sensors_attribute_list, self.sensors_transforms):
+            gamma_correction = 2.2
+            bp_library = self.world.get_blueprint_library()
+            bp = bp_library.find(sensor_attribute_raw[0])
+            if sensor_attribute_raw[0].startswith('sensor.camera'):
+                bp.set_attribute('image_size_x', str(self.args.image_width))
+                bp.set_attribute('image_size_y', str(self.args.image_height))
+                if bp.has_attribute('gamma'):
+                    bp.set_attribute('gamma', str(gamma_correction))
+                for attr_name, attr_value in sensor_attribute_raw[3].items():
+                    bp.set_attribute(attr_name, attr_value)
+            elif sensor_attribute_raw[0].startswith('sensor.lidar'):
+                bp.set_attribute('range', '10')
+                bp.set_attribute('channels', '16')
+                bp.set_attribute('points_per_second', '22400')
+                # bp.set_attribute('range', '100')
+                # bp.set_attribute('channels', '64')
+                # bp.set_attribute('points_per_second', '2240000')
+                bp.set_attribute('rotation_frequency', '20')
+                # bp.set_attribute('sensor_tick', str(0.05))
+                bp.set_attribute('dropoff_general_rate', '0.0')
+                bp.set_attribute('dropoff_intensity_limit', '1.0')
+                bp.set_attribute('dropoff_zero_intensity', '0.0')
+                # bp.set_attribute('noise_stddev', '0.0')
+            sensor_attribute_raw.append(bp)
+            sensor_actor = self._parent.get_world().spawn_actor(
+                bp,
+                sensor_transform[0],
+                attach_to=self._parent)
+            self.set_sensor(sensor_actor)
+
+    def set_sensor(self, sensor_actor: carla.Sensor):
+        self.sensor_list.append(sensor_actor)
+        self.sensor_id_list.append(sensor_actor.id)
         filename = Path(self.args.raw_data_path,
-                        "{}_{}".format(self._parent.type_id, self._parent.id),
-                        "{}_{}".format(self._parent.type_id, self._parent.id))
+                            "{}_{}".format(self._parent.type_id, self._parent.id),
+                            "{}_{}".format(self._parent.type_id, self._parent.id))
         filename = filename.as_posix()
-        # '%s_%d'%(self._parent.type_id, self._parent.id),
-        # '%s_%d'%(self.sensor.type_id, self.sensor.id)).as_posix()
-        # filename = self.args.raw_data_path + \
-        #             self._parent.type_id + '_' + str(self._parent.id) + '/' + \
-        #             self.sensor.type_id + '_' + str(self.sensor.id)
-
+        sensor_type = copy.deepcopy(str(sensor_actor.type_id))
+        print(self._parent.id, sensor_type, sensor_actor.id)
         weak_self = weakref.ref(self)
-        self.sensor.listen(lambda sensor_data: CavCollectThread.data_callback(weak_self, sensor_data, filename, self.data_queue))
+        sensor_actor.listen(lambda sensor_data: CavCollectThread.data_callback(weak_self,
+                                                                               sensor_data,
+                                                                               sensor_type,
+                                                                               filename,
+                                                                               self.data_queue))
+        # print("id_list: {}".format(self.sensor_id_list))
         # self.sensor.stop()
         # print(filename)
 
     @staticmethod
-    def data_callback(weak_self, data, filename, data_queue: Queue):
-        data_queue.put((data, filename))
+    def data_callback(weak_self, sensor_data, type_id, filename, data_queue: Queue):
+        data_queue.put((sensor_data, type_id, filename))
 
-    def get_sensor_id(self):
+    def get_sensor_id_list(self):
         self.join()
-        return self.sensor.id
+        return self.sensor_id_list
 
     def save_to_disk(self):
-        sensor_frame = self.data_queue.get(True, 1.0)
-        sensor_data = sensor_frame[0]
-        filename = sensor_frame[1]
-        # if sensor_data.frame < RAW_DATA_START or sensor_data.frame > RAW_DATA_END:
-        #     return
-        if sensor_data.frame % self.args.sample_frequence != 0:
-            return
-        if self.sensor.type_id == 'sensor.camera.semantic_segmentation':
-            sensor_data.convert(self.sensor_attribute[1])
-            # sensor_data.save_to_disk(filename + '/seg' + '/%010d' % sensor_data.frame)
-            carla_image_data_array = numpy.ndarray(
-                shape=(sensor_data.height, sensor_data.width, 4),
-                dtype=numpy.uint8, buffer=sensor_data.raw_data)
-            os.makedirs(filename + '/seg', exist_ok=True)
-            numpy.savez_compressed(filename + '/seg' + '/%010d' % sensor_data.frame, a=carla_image_data_array)
-        # elif self.sensor.type_id == 'sensor.camera.depth':
-        #     sensor_data.convert(self.sensor_attribute[1])
-        #     sensor_data.save_to_disk(filename + '/%010d' % sensor_data.frame + '_depth')
-        else:
-            sensor_data.save_to_disk(filename + '/%010d' % sensor_data.frame)
+        print("Save vehicle {} sensor data:".format(self._parent.id))
+        for _ in range(len(self.sensor_list)):
+            sensor_frame = self.data_queue.get(True, 1.0)
+            sensor_data = sensor_frame[0]
+            sensor_type_id = sensor_frame[1]
+            filename = sensor_frame[2]
+
+            print("\tFrame: {} type: {} | {}".format(sensor_data.frame, sensor_data, sensor_type_id))
+
+            if sensor_type_id == 'sensor.camera.semantic_segmentation':
+                sensor_data.convert(carla.ColorConverter.CityScapesPalette)
+                # sensor_data.save_to_disk(filename + '/seg' + '/%010d' % sensor_data.frame)
+                carla_image_data_array = numpy.ndarray(
+                    shape=(sensor_data.height, sensor_data.width, 4),
+                    dtype=numpy.uint8, buffer=sensor_data.raw_data)
+                os.makedirs(filename + '/seg', exist_ok=True)
+                numpy.savez_compressed(filename + '/seg' + '/%010d' % sensor_data.frame, a=carla_image_data_array)
+            else:
+                sensor_data.save_to_disk(filename + '/%010d' % sensor_data.frame)
 

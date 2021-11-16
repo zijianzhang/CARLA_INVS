@@ -7,7 +7,7 @@ sys.path.append(Path(__file__).resolve().parent.parent.as_posix())  # repo path
 sys.path.append(Path(__file__).resolve().parent.as_posix())  # file path
 
 from params import *
-
+import queue
 try:
     _egg_file = sorted(Path(CARLA_PATH, 'PythonAPI/carla/dist').expanduser().glob('carla-*%d.*-%s.egg' % (
         sys.version_info.major,
@@ -231,10 +231,7 @@ class Scenario(object):
         self.CAV_blueprints = self.world.get_blueprint_library().filter('vehicle.tesla.model3')
         # sensor information
         self.sensor_attribute = [['sensor.camera.rgb', carla.ColorConverter.Raw, 'Camera RGB', {}],
-                                 ['sensor.camera.semantic_segmentation', carla.ColorConverter.CityScapesPalette,
-                                  'Camera Semantic Segmentation (CityScapes Palette)', {}],
-                                 # ['sensor.camera.semantic_segmentation', carla.ColorConverter.CityScapesPalette,'Camera Semantic Segmentation (CityScapes Palette)', {}],
-                                 # ['sensor.lidar.ray_cast', None, 'Lidar (Ray-Cast)', {}],
+                                 ['sensor.camera.semantic_segmentation', carla.ColorConverter.CityScapesPalette, 'Camera Semantic Segmentation (CityScapes Palette)', {}],
                                  ['sensor.lidar.ray_cast', None, 'Lidar (Ray-Cast)', {}]]
         self.sensor_transform = [(carla.Transform(carla.Location(x=0, z=2.5)), Attachment.Rigid),
                                  (carla.Transform(carla.Location(x=0, z=2.5)), Attachment.Rigid),
@@ -421,7 +418,7 @@ class Scenario(object):
                 settings.substepping = args.substepping
                 settings.max_substep_delta_time = args.max_substep_delta_time
                 settings.max_substeps = args.max_substeps
-
+                print(settings)
                 self.world.apply_settings(settings)
             else:
                 self.synchronous_master = False
@@ -437,6 +434,7 @@ class Scenario(object):
         # print(len(CAV_spawn_points))
         self.HD_agents = self.spawn_actorlist('vehicle', self.HD_blueprints, HD_spawn_points)
         print(len(self.HD_agents))
+        print("Spawning CAV_Agents")
         self.CAV_agents = self.spawn_actorlist('vehicle', self.CAV_blueprints, CAV_spawn_points)
 
     def stop_record(self, args):
@@ -457,10 +455,10 @@ class Scenario(object):
         print("Stop recording")
 
     def spawn_actorlist(self, actor_type, agent_blueprint=None, spawn_points=None, parent_agent=None):
+        print("spawn actor list:")
         bacth_spawn = []
         id_list = []
         if actor_type == 'vehicle':
-
             if not random.choice(agent_blueprint).id.startswith('vehicle.tesla'):
                 # HD_agents
                 # print(len(spawn_points))
@@ -505,13 +503,13 @@ class Scenario(object):
                         self.agent_list.append(tmp_agent)
         elif actor_type == 'sensor':
             # sensor agents
-            for index in range(len(self.sensor_attribute)):
-                sensor_attribute = self.sensor_attribute[index]
-                transform = self.sensor_transform[index]
-                tmp_sensor = CavCollectThread(parent_agent, sensor_attribute, transform, self.args)
-                tmp_sensor.start()
-                self.sensor_thread.append(tmp_sensor)
-                id_list.append(tmp_sensor.get_sensor_id())
+            tmp_sensor_thread = CavCollectThread(parent_agent,
+                                                 self.sensor_attribute,
+                                                 self.sensor_transform,
+                                                 self.args)
+            tmp_sensor_thread.start()
+            self.sensor_thread.append(tmp_sensor_thread)
+            id_list.extend(tmp_sensor_thread.get_sensor_id_list())
         return id_list
 
     def check_vehicle_state(self):
@@ -566,6 +564,7 @@ class Scenario(object):
         HD_additional_spawn_points, CAV_additional_spawn_points = self.map.shuffle_spawn_points(
             self.map.additional_spawn_points)
         self.HD_agents += self.spawn_actorlist('vehicle', self.HD_blueprints, HD_additional_spawn_points)
+        print("Spawn CAV agents and sensors")
         self.CAV_agents += self.spawn_actorlist('vehicle', self.CAV_blueprints, CAV_additional_spawn_points)
 
     def return_cor(self, waypoint):
