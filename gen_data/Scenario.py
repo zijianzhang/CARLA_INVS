@@ -233,9 +233,9 @@ class Scenario(object):
         self.sensor_attribute = [['sensor.camera.rgb', carla.ColorConverter.Raw, 'Camera RGB', {}],
                                  ['sensor.camera.semantic_segmentation', carla.ColorConverter.CityScapesPalette, 'Camera Semantic Segmentation (CityScapes Palette)', {}],
                                  ['sensor.lidar.ray_cast', None, 'Lidar (Ray-Cast)', {}]]
-        self.sensor_transform = [(carla.Transform(carla.Location(x=0, z=2.5)), Attachment.Rigid),
-                                 (carla.Transform(carla.Location(x=0, z=2.5)), Attachment.Rigid),
-                                 (carla.Transform(carla.Location(x=0, z=2.5)), Attachment.Rigid)]
+        self.sensor_transform = [(carla.Transform(carla.Location(x=0, z=1.65)), Attachment.Rigid),
+                                 (carla.Transform(carla.Location(x=0, z=1.65)), Attachment.Rigid),
+                                 (carla.Transform(carla.Location(x=-0.27, z=1.73)), Attachment.Rigid)]
         self.args = args
         weak_self = weakref.ref(self)
         self.world.on_tick(lambda world_snapshot: self.on_world_tick(weak_self, world_snapshot))
@@ -381,8 +381,7 @@ class Scenario(object):
                 print('start from frameID: %s.' % start)
             while loop_status:
                 if args.sync and self.synchronous_master:
-                    # time.sleep(1)
-                    time.sleep(0.1)
+                    # time.sleep(0.05)
                     now = self.run_step()
                     if (now - start) % 10 == 0:
                         print('Frame ID:' + str(now))
