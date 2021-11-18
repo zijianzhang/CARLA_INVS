@@ -8,6 +8,7 @@ sys.path.append(Path(__file__).resolve().parent.as_posix())  # file path
 
 from params import *
 import queue
+import signal
 try:
     _egg_file = sorted(Path(CARLA_PATH, 'PythonAPI/carla/dist').expanduser().glob('carla-*%d.*-%s.egg' % (
         sys.version_info.major,
@@ -41,6 +42,13 @@ except IndexError:
 
 from vehicle_agent import VehicleAgent, CavCollectThread, CavControlThread
 from utils.get2Dlabel import ClientSideBoundingBoxes
+
+sig_interrupt = False
+
+
+def signal_handler(signal, frame):
+    global sig_interrupt
+    sig_interrupt = True
 
 
 class Args(object):
@@ -238,8 +246,8 @@ class Scenario(object):
                                  (carla.Transform(carla.Location(x=0, z=1.65)), Attachment.Rigid),
                                  (carla.Transform(carla.Location(x=-0.27, z=1.73)), Attachment.Rigid)]
         self.args = args
-        weak_self = weakref.ref(self)
-        self.world.on_tick(lambda world_snapshot: self.on_world_tick(weak_self, world_snapshot))
+        # weak_self = weakref.ref(self)
+        # self.world.on_tick(lambda world_snapshot: self.on_world_tick(weak_self, world_snapshot))
 
     @staticmethod
     def parse_transform(transform):
@@ -274,9 +282,11 @@ class Scenario(object):
         _label_path.mkdir(parents=True, exist_ok=True)
         # if not os.path.exists(self.args.raw_data_path+'label'):
         #     os.makedirs(self.args.raw_data_path+'label')
+        # print("World Frame: {}".format(world_snapshot.frame))
         if len(actors) != 0:
             _filename = (_label_path / ('%010d.txt' % (world_snapshot.frame))).as_posix()
             np.savetxt(_filename, actors, fmt='%s', delimiter=' ')
+            print("Save label {}".format(world_snapshot.frame))
             # np.savetxt(self.args.raw_data_path + '/label/%010d.txt' % world_snapshot.frame, actors, fmt='%s', delimiter=' ')
 
         # 2D bounding box
@@ -368,35 +378,30 @@ class Scenario(object):
 
     def generate_data(self, args):
         self.recording_rawdata = True
-        loop_status = True
-        try:
-            self.start_record(args)
-            print(args.sync)
-            if not args.sync or not self.synchronous_master:
-                self.world.wait_for_tick()
-            else:
-                start = self.world.tick()
-                if self.dynamic_weather:
-                    self.weather.tick(1)
-                    self.world.set_weather(self.weather.weather)
+
+        self.start_record(args)
+        start = self.world.tick()
+        print("Recording on file: %s" % self.client.start_recorder(args.recorder_filename))
+        if self.dynamic_weather:
+                self.weather.tick(1)
+                self.world.set_weather(self.weather.weather)
                 print('start from frameID: %s.' % start)
-            while loop_status:
-                if args.sync and self.synchronous_master:
-                    # time.sleep(0.05)
-                    now = self.run_step()
-                    if (now - start) % 10 == 0:
-                        print('Frame ID:' + str(now))
-                else:
-                    self.world.wait_for_tick()
-        except KeyboardInterrupt:
-            loop_status = False
+        while True:
+            if args.sync and self.synchronous_master:
+                now = self.run_step()
+                global sig_interrupt
+                if sig_interrupt:
+                    print("Exit step, wait 2 seconds...")
+                    print("Recording on file: %s" % self.client.stop_recorder)
+                    time.sleep(2.0)
+                    break
+
+        try:
+            print('stop from frameID: %s.' % now)
         finally:
-            try:
-                print('stop from frameID: %s.' % now)
-            finally:
-                pass
-            self.stop_record(args)
             pass
+        self.stop_record(args)
+        pass
 
     def start_record(self, args):
         self.synchronous_master = False
@@ -426,7 +431,6 @@ class Scenario(object):
         # if not os.path.exists('log'):
         #     os.mkdir('log')
         #     print('mkdir log finished.')
-        print("Recording on file: %s" % self.client.start_recorder(args.recorder_filename))
         self.agent_list = []
         self.sensor_relation = {}
         self.sensor_thread = []
@@ -451,7 +455,7 @@ class Scenario(object):
             self.sensor_list += sensor
         self.client.apply_batch([carla.command.DestroyActor(x) for x in self.sensor_list])
         print('\ndestroying %d sensors' % len(self.sensor_list))
-        self.client.stop_recorder()
+        # self.client.stop_recorder()
         print("Stop recording")
 
     def spawn_actorlist(self, actor_type, agent_blueprint=None, spawn_points=None, parent_agent=None):
@@ -555,12 +559,16 @@ class Scenario(object):
                 logging.error(response.error)
         if not self.map.pretrain_model:
             self.check_vehicle_state()
-        tick = self.world.tick()
-        snap_shot = self.world.get_snapshot()
+        tick = self.world.tick(seconds=60.0)
+        print("-------------")
+        print("WorldTick: {}".format(tick))
         weak_self = weakref.ref(self)
+        snap_shot = self.world.get_snapshot()
         self.on_world_tick(weak_self, snap_shot)
+        print("SnapShotFrame: {}".format(snap_shot.frame))
         for t in self.sensor_thread:
-            t.save_to_disk()
+            t.save_to_disk(tick)
+            t.join()
         return tick
 
     def add_anget_and_vehicles(self):
@@ -666,7 +674,7 @@ class Scenario(object):
 
 
 if __name__ == "__main__":
-
+    signal.signal(signal.SIGINT, signal_handler)
     args = Args(sys.argv)
     scenario = Scenario(args)
     if args.task == 'spawn':

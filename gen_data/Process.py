@@ -177,6 +177,8 @@ def write_labels(raw_data_path, frame_id, ego_vehicle_label, tmp_bboxes, pointcl
             # image_path = raw_data_path + '/' + _tmp + '/' + frame_id[:-3] + 'png' 
             break
     # print(image_path)
+    if not os.path.exists(image_path):
+        return None
     shutil.copy(image_path, dataset_path+'/image0'+str(index))
     # np.savetxt(dataset_path + '/calib0'+str(index)+'/' + frame_id, np.array(calib_info), fmt='%s', delimiter=' ')
     calib = Calibration(dataset_path + '/calib0'+str(index)+'/' + frame_id)
@@ -337,7 +339,7 @@ if __name__ == "__main__":
     if len(frames) < 10:
         print("there is no enough data.")
     # exit()
-    print(len(frames))
+    print("Label file has [%d] frames", len(frames))
     
     frame_start = RAW_DATA_START
     frame_end   = RAW_DATA_END
@@ -361,6 +363,7 @@ if __name__ == "__main__":
             tmp_name = ego_vehicle_label[0] + '_' + ego_vehicle_label[1]
             # tmp_car = ['282','274','284','275','276']
             # tmp_car = ['235','236','237','238','240','275']
+
             if 'vehicle.tesla' in ego_vehicle_label[0]:# and tmp_name in AD_vehicles_location.keys():# and '319' in ego_vehicle_label[1]:
                 # if ego_vehicle_label[1] not in tmp_car:
                 #     continue
@@ -379,10 +382,13 @@ if __name__ == "__main__":
                 calib_info_list.append(' '.join(tmp_info))
                 calib_info_list.append(' '.join(tmp_info))
 
-    
                 camera_info_list = get_sensor_transform(ego_vehicle_label[1], labels, sensor='camera')
                 lidar_raw_data_file = get_ego_lidar_data_path(ego_vehicle_label, _frame[:-3])
-                pointCloud = get_raw_lidar_data(lidar_raw_data_file, lidar_rotation_test)
+                if os.path.exists(lidar_raw_data_file):
+                    pointCloud = get_raw_lidar_data(lidar_raw_data_file, lidar_rotation_test)
+                else:
+                    print("Lidar frame {} not exist, skipped following frames".format(_frame.split('.', 1)[0]))
+                    break
                 for index, camera in enumerate(camera_info_list):
                     camera_center, camera_rotation, camera_id = camera
                     velo_to_cam_matrix = get_matrix_from_origin_to_target(lidar_center,lidar_rotation,camera_center,camera_rotation)
@@ -485,6 +491,9 @@ if __name__ == "__main__":
                     if len(tmp_labels) == 0:
                         tmp_labels.append(['DontCare','-1','-1','-10','522.25','202.35','547.77','219.71','-1','-1','-1','-1000','-1000','-1000','-10','-10'])
                     img_path = write_labels(raw_data_path, _frame, ego_vehicle_label, tmp_labels, pointCloud, index, camera_id, calib_info_list)
+                    if img_path is None:
+                        print("Image frame {} not exist, skipped".format(_frame.split('.', 1)[0]))
+                        break
                     print("img_path: {}".format(img_path))
                     # print(label2d)
                     show_flag = False

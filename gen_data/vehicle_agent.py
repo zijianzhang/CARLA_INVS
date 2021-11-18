@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 import copy
 import sys
+import time
 from pathlib import Path
 sys.path.append(Path(__file__).resolve().parent.parent.as_posix() ) #repo path
 sys.path.append(Path(__file__).resolve().parent.as_posix() ) #file path
@@ -63,6 +64,7 @@ class CavCollectThread(Thread):
         self.sensor_attribute = None
         self.sensor_id_list = []
         self.sensor_list = []
+        self.data_queue_list = []
 
     def run(self):
         self.spawn_sensors()
@@ -115,11 +117,14 @@ class CavCollectThread(Thread):
         sensor_type = copy.deepcopy(str(sensor_actor.type_id))
         print(self._parent.id, sensor_type, sensor_actor.id)
         weak_self = weakref.ref(self)
+        data_queue = Queue()
+        self.data_queue_list.append(data_queue)
+        idx = len(self.data_queue_list)-1
         sensor_actor.listen(lambda sensor_data: CavCollectThread.data_callback(weak_self,
                                                                                sensor_data,
                                                                                sensor_type,
                                                                                filename,
-                                                                               self.data_queue))
+                                                                               self.data_queue_list[idx]))
         # print("id_list: {}".format(self.sensor_id_list))
         # self.sensor.stop()
         # print(filename)
@@ -132,24 +137,27 @@ class CavCollectThread(Thread):
         self.join()
         return self.sensor_id_list
 
-    def save_to_disk(self):
+    def save_to_disk(self, frame_id):
         print("Save vehicle {} sensor data:".format(self._parent.id))
-        for _ in range(len(self.sensor_list)):
-            sensor_frame = self.data_queue.get(True, 1.0)
-            sensor_data = sensor_frame[0]
-            sensor_type_id = sensor_frame[1]
-            filename = sensor_frame[2]
+        sensor_frame_id = 0
+        while sensor_frame_id < frame_id:
+            for queue in self.data_queue_list:
+                sensor_frame = queue.get(True, 1.0)
+                sensor_data = sensor_frame[0]
+                sensor_type_id = sensor_frame[1]
+                filename = sensor_frame[2]
+                sensor_frame_id = sensor_data.frame
+                print("\tFrame: {} type: {} | {}".format(sensor_frame_id, sensor_data, sensor_type_id))
 
-            print("\tFrame: {} type: {} | {}".format(sensor_data.frame, sensor_data, sensor_type_id))
-
-            if sensor_type_id == 'sensor.camera.semantic_segmentation':
-                sensor_data.convert(carla.ColorConverter.CityScapesPalette)
-                # sensor_data.save_to_disk(filename + '/seg' + '/%010d' % sensor_data.frame)
-                carla_image_data_array = numpy.ndarray(
-                    shape=(sensor_data.height, sensor_data.width, 4),
-                    dtype=numpy.uint8, buffer=sensor_data.raw_data)
-                os.makedirs(filename + '/seg', exist_ok=True)
-                numpy.savez_compressed(filename + '/seg' + '/%010d' % sensor_data.frame, a=carla_image_data_array)
-            else:
-                sensor_data.save_to_disk(filename + '/%010d' % sensor_data.frame)
+                if sensor_type_id == 'sensor.camera.semantic_segmentation':
+                    sensor_data.convert(carla.ColorConverter.CityScapesPalette)
+                    # sensor_data.save_to_disk(filename + '/seg' + '/%010d' % sensor_data.frame)
+                    carla_image_data_array = numpy.ndarray(
+                        shape=(sensor_data.height, sensor_data.width, 4),
+                        dtype=numpy.uint8, buffer=sensor_data.raw_data)
+                    os.makedirs(filename + '/seg', exist_ok=True)
+                    numpy.savez_compressed(filename + '/seg' + '/%010d' % sensor_data.frame, a=carla_image_data_array)
+                else:
+                    sensor_data.save_to_disk(filename + '/%010d' % sensor_data.frame)
+            time.sleep(0.05)
 
