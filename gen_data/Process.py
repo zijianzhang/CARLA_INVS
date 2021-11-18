@@ -164,20 +164,19 @@ def write_labels(raw_data_path, frame_id, ego_vehicle_label, tmp_bboxes, pointcl
     _raw_data_path = (raw_data_path / ego_vehicle_name).as_posix()
     # raw_data_path += '/' + ego_vehicle_name
     sensor_raw_path = os.listdir(_raw_data_path)
-    if not os.path.exists(dataset_path+'/label0'+str(index)):
-        os.makedirs(dataset_path+'/label0'+str(index))
-    if not os.path.exists(dataset_path+'/image0'+str(index)):
-        os.makedirs(dataset_path+'/image0'+str(index))
-    if not os.path.exists(dataset_path+'/calib0'+str(index)):
-        os.makedirs(dataset_path+'/calib0'+str(index))
-    if not os.path.exists(dataset_path+'/velodyne'):
-        os.makedirs(dataset_path+'/velodyne')
-    
+    os.makedirs(dataset_path + '/label0' + str(index), exist_ok=True)
+    os.makedirs(dataset_path+'/image0'+str(index), exist_ok=True)
+    os.makedirs(dataset_path+'/calib0'+str(index), exist_ok=True)
+    os.makedirs(dataset_path+'/velodyne', exist_ok=True)
+
+    image_path = None
     for _tmp in sensor_raw_path:
-        if str(camera_id) in _tmp and 'label' not in _tmp:
-            image_path = Path( _raw_data_path, _tmp, frame_id[:-3]+'png' ).as_posix()
+        # image_path = Path(_raw_data_path, _tmp, frame_id[:-3] + 'png').as_posix()
+        if 'label' not in _tmp:
+            image_path = Path(_raw_data_path, _tmp, frame_id[:-3]+'png').as_posix()
             # image_path = raw_data_path + '/' + _tmp + '/' + frame_id[:-3] + 'png' 
             break
+    # print(image_path)
     shutil.copy(image_path, dataset_path+'/image0'+str(index))
     # np.savetxt(dataset_path + '/calib0'+str(index)+'/' + frame_id, np.array(calib_info), fmt='%s', delimiter=' ')
     calib = Calibration(dataset_path + '/calib0'+str(index)+'/' + frame_id)
@@ -265,8 +264,10 @@ def find_Ad_vehicles_location(vehicles,labels):
     # return {}
     # print(labels)
     for vehicle in vehicles:
-        lidar_location,lidar_rotation,tmp_rotation = get_sensor_transform(vehicle[-3:],labels,'lidar')
-        camera_location,camera_rotation,id = get_sensor_transform(vehicle[-3:],labels,'camera')[0]
+        vehicle_id = vehicle.split('_', 1)[1]
+        # v_id = vehicle[-3:]
+        lidar_location,lidar_rotation,tmp_rotation = get_sensor_transform(vehicle_id,labels,'lidar')
+        camera_location,camera_rotation,id = get_sensor_transform(vehicle_id,labels,'camera')[0]
         results[vehicle] = [lidar_location,lidar_rotation,tmp_rotation,camera_location,camera_rotation,id]
     return results
 
@@ -355,7 +356,7 @@ if __name__ == "__main__":
         # tmp_car_id = ['282','274','284','275','276']
         # AD_vehicles = [v for v in raw_data_path.iterdir() if 'vehicle' in v]
         AD_vehicles = [v for v in os.listdir(str(raw_data_path)) if 'vehicle' in v]
-        AD_vehicles_location = find_Ad_vehicles_location(AD_vehicles,labels)
+        AD_vehicles_location = find_Ad_vehicles_location(AD_vehicles, labels)
         for ego_vehicle_label in labels:
             tmp_name = ego_vehicle_label[0] + '_' + ego_vehicle_label[1]
             # tmp_car = ['282','274','284','275','276']
@@ -484,6 +485,7 @@ if __name__ == "__main__":
                     if len(tmp_labels) == 0:
                         tmp_labels.append(['DontCare','-1','-1','-10','522.25','202.35','547.77','219.71','-1','-1','-1','-1000','-1000','-1000','-10','-10'])
                     img_path = write_labels(raw_data_path, _frame, ego_vehicle_label, tmp_labels, pointCloud, index, camera_id, calib_info_list)
+                    print("img_path: {}".format(img_path))
                     # print(label2d)
                     show_flag = False
                     if show_flag:

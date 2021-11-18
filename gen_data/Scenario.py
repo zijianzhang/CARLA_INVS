@@ -53,9 +53,10 @@ class Args(object):
 
         # For sync mode
         # Make sure fixed_delta_seconds <= max_substep_delta_time * max_substeps
-        self.fixed_delta_seconds = 0.05
+        # FPS = 1.0 / fixed_dt
+        self.fixed_delta_seconds = 0.1
         self.substepping = True
-        self.max_substep_delta_time = 0.01
+        self.max_substep_delta_time = 0.02
         self.max_substeps = 10
 
         # map information
@@ -555,6 +556,9 @@ class Scenario(object):
         if not self.map.pretrain_model:
             self.check_vehicle_state()
         tick = self.world.tick()
+        snap_shot = self.world.get_snapshot()
+        weak_self = weakref.ref(self)
+        self.on_world_tick(weak_self, snap_shot)
         for t in self.sensor_thread:
             t.save_to_disk()
         return tick

@@ -93,7 +93,7 @@ class CavCollectThread(Thread):
                 bp.set_attribute('rotation_frequency', '10')
                 bp.set_attribute('upper_fov', '2.0')
                 bp.set_attribute('lower_fov', '-24.8')
-                # bp.set_attribute('sensor_tick', str(0.05))
+                # bp.set_attribute('sensor_tick', str(0.1))
                 # bp.set_attribute('dropoff_general_rate', '0.0')
                 # bp.set_attribute('dropoff_intensity_limit', '1.0')
                 # bp.set_attribute('dropoff_zero_intensity', '0.0')

@@ -223,7 +223,8 @@ if __name__ == "__main__":
     frame_id_list = _read_imageset_file(gt_split_file)
     for vehicle_id in vehicle_list:
         for frame_id in frame_id_list:
-            if vehicle_id[-3:] not in tmp_car or str(int(frame_id[:-4])) not in tmp_frame:
+            v_id = vehicle_id.split('_', 1)[1]
+            if v_id not in tmp_car or str(int(frame_id[:-4])) not in tmp_frame:
                 if len(tmp_car) == 0 and len(tmp_frame) == 0:
                     pass
                 else:
