@@ -142,22 +142,26 @@ class CavCollectThread(Thread):
         sensor_frame_id = 0
         while sensor_frame_id < frame_id:
             for queue in self.data_queue_list:
-                sensor_frame = queue.get(True, 1.0)
-                sensor_data = sensor_frame[0]
-                sensor_type_id = sensor_frame[1]
-                filename = sensor_frame[2]
-                sensor_frame_id = sensor_data.frame
-                print("\tFrame: {} type: {} | {}".format(sensor_frame_id, sensor_data, sensor_type_id))
+                    sensor_frame = queue.get(True, 1.0)
+                    sensor_data = sensor_frame[0]
+                    sensor_type_id = sensor_frame[1]
+                    filename = sensor_frame[2]
+                    sensor_frame_id = sensor_data.frame
 
-                if sensor_type_id == 'sensor.camera.semantic_segmentation':
-                    sensor_data.convert(carla.ColorConverter.CityScapesPalette)
-                    # sensor_data.save_to_disk(filename + '/seg' + '/%010d' % sensor_data.frame)
-                    carla_image_data_array = numpy.ndarray(
-                        shape=(sensor_data.height, sensor_data.width, 4),
-                        dtype=numpy.uint8, buffer=sensor_data.raw_data)
-                    os.makedirs(filename + '/seg', exist_ok=True)
-                    numpy.savez_compressed(filename + '/seg' + '/%010d' % sensor_data.frame, a=carla_image_data_array)
-                else:
-                    sensor_data.save_to_disk(filename + '/%010d' % sensor_data.frame)
+                    if(sensor_frame_id < frame_id):
+                        continue
+
+                    print("\tFrame: {} type: {} | {}".format(sensor_frame_id, sensor_data, sensor_type_id))
+                    if sensor_type_id == 'sensor.camera.semantic_segmentation':
+                        sensor_data.convert(carla.ColorConverter.CityScapesPalette)
+                        # sensor_data.save_to_disk(filename + '/seg' + '/%010d' % sensor_data.frame)
+                        carla_image_data_array = numpy.ndarray(
+                            shape=(sensor_data.height, sensor_data.width, 4),
+                            dtype=numpy.uint8, buffer=sensor_data.raw_data)
+                        os.makedirs(filename + '/seg', exist_ok=True)
+                        numpy.savez_compressed(filename + '/seg' + '/%010d' % sensor_data.frame, a=carla_image_data_array)
+                    else:
+                        sensor_data.save_to_disk(filename + '/%010d' % sensor_data.frame)
             time.sleep(0.05)
+
 
