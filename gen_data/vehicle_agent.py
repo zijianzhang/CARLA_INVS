@@ -1,18 +1,16 @@
 #!/usr/bin/python3
 import copy
-import sys
 import time
-from pathlib import Path
-sys.path.append(Path(__file__).resolve().parent.parent.as_posix() ) #repo path
-sys.path.append(Path(__file__).resolve().parent.as_posix() ) #file path
+import weakref
+from queue import Queue
 from threading import Thread
 
 import carla
-import weakref
 import numpy
 from agents.navigation.behavior_agent import BehaviorAgent  # pylint: disable=import-error
-from queue import Queue
+
 from params import *
+
 
 class VehicleAgent(BehaviorAgent):
     def __init__(self, vehicle):
@@ -73,7 +71,7 @@ class CavCollectThread(Thread):
         for i in range(len(self.sensors_attribute_list)):
             sensor_attribute_raw = self.sensors_attribute_list[i]
             sensor_transform = self.sensors_transforms[i]
-        # for sensor_attribute_raw, sensor_transform in zip(self.sensors_attribute_list, self.sensors_transforms):
+            # for sensor_attribute_raw, sensor_transform in zip(self.sensors_attribute_list, self.sensors_transforms):
             gamma_correction = 2.2
             bp_library = self.world.get_blueprint_library()
             bp = bp_library.find(sensor_attribute_raw[0])
@@ -111,26 +109,26 @@ class CavCollectThread(Thread):
         self.sensor_list.append(sensor_actor)
         self.sensor_id_list.append(sensor_actor.id)
         filename = Path(self.args.raw_data_path,
-                            "{}_{}".format(self._parent.type_id, self._parent.id),
-                            "{}_{}".format(self._parent.type_id, self._parent.id))
+                        "{}_{}".format(self._parent.type_id, self._parent.id),
+                        "{}_{}".format(self._parent.type_id, self._parent.id))
         filename = filename.as_posix()
         sensor_type = copy.deepcopy(str(sensor_actor.type_id))
-        print(self._parent.id, sensor_type, sensor_actor.id)
+        print("Set sensor:\tparent_id: {}\tsensor_id: {}\tsensor_type: {}".format(self._parent.id,
+                                                                                  sensor_actor.id,
+                                                                                  sensor_type))
         weak_self = weakref.ref(self)
         data_queue = Queue()
         self.data_queue_list.append(data_queue)
-        idx = len(self.data_queue_list)-1
+        idx = len(self.data_queue_list) - 1
         sensor_actor.listen(lambda sensor_data: CavCollectThread.data_callback(weak_self,
                                                                                sensor_data,
                                                                                sensor_type,
                                                                                filename,
                                                                                self.data_queue_list[idx]))
-        # print("id_list: {}".format(self.sensor_id_list))
-        # self.sensor.stop()
-        # print(filename)
 
     @staticmethod
     def data_callback(weak_self, sensor_data, type_id, filename, data_queue: Queue):
+        # Save carla sensor data to its data queue
         data_queue.put((sensor_data, type_id, filename))
 
     def get_sensor_id_list(self):
@@ -142,26 +140,27 @@ class CavCollectThread(Thread):
         sensor_frame_id = 0
         while sensor_frame_id < frame_id:
             for queue in self.data_queue_list:
-                    sensor_frame = queue.get(True, 1.0)
-                    sensor_data = sensor_frame[0]
-                    sensor_type_id = sensor_frame[1]
-                    filename = sensor_frame[2]
-                    sensor_frame_id = sensor_data.frame
+                sensor_frame = queue.get(True, 1.0)
+                sensor_data = sensor_frame[0]
+                sensor_type_id = sensor_frame[1]
+                filename = sensor_frame[2]
+                sensor_frame_id = sensor_data.frame
 
-                    if(sensor_frame_id < frame_id):
-                        continue
+                if sensor_frame_id < frame_id:
+                    continue
 
-                    print("\tFrame: {} type: {} | {}".format(sensor_frame_id, sensor_data, sensor_type_id))
-                    if sensor_type_id == 'sensor.camera.semantic_segmentation':
-                        sensor_data.convert(carla.ColorConverter.CityScapesPalette)
-                        # sensor_data.save_to_disk(filename + '/seg' + '/%010d' % sensor_data.frame)
-                        carla_image_data_array = numpy.ndarray(
-                            shape=(sensor_data.height, sensor_data.width, 4),
-                            dtype=numpy.uint8, buffer=sensor_data.raw_data)
-                        os.makedirs(filename + '/seg', exist_ok=True)
-                        numpy.savez_compressed(filename + '/seg' + '/%010d' % sensor_data.frame, a=carla_image_data_array)
-                    else:
-                        sensor_data.save_to_disk(filename + '/%010d' % sensor_data.frame)
+                print("\tFrame: {} type: {} | {}".format(sensor_frame_id, sensor_data, sensor_type_id))
+                # For now, only support carla.Sensor which has save_to_disk function (image, lidar)
+                if sensor_type_id == 'sensor.camera.semantic_segmentation':
+                    sensor_data.convert(carla.ColorConverter.CityScapesPalette)
+                    # sensor_data.save_to_disk(filename + '/seg' + '/%010d' % sensor_data.frame)
+                    carla_image_data_array = numpy.ndarray(
+                        shape=(sensor_data.height, sensor_data.width, 4),
+                        dtype=numpy.uint8, buffer=sensor_data.raw_data)
+                    os.makedirs(filename + '/seg', exist_ok=True)
+                    numpy.savez_compressed(filename + '/seg' + '/%010d' % sensor_data.frame, a=carla_image_data_array)
+                else:
+                    sensor_data.save_to_disk(filename + '/%010d' % sensor_data.frame)
+                # TODO: Other sensor support
+            # Wait for sensor data ready
             time.sleep(0.05)
-
-
