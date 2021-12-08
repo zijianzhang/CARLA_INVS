@@ -559,16 +559,17 @@ class Scenario(object):
                 logging.error(response.error)
         if not self.map.pretrain_model:
             self.check_vehicle_state()
+        s = time.time()
         tick = self.world.tick(seconds=60.0)
         print("-------------")
-        print("WorldTick: {}".format(tick))
+        print("WorldTick: {}, dur= {}".format(tick, time.time()-s))
         weak_self = weakref.ref(self)
         snap_shot = self.world.get_snapshot()
         self.on_world_tick(weak_self, snap_shot)
         print("SnapShotFrame: {}".format(snap_shot.frame))
         for t in self.sensor_thread:
             t.save_to_disk(tick)
-            t.join()
+            # t.join()
         return tick
 
     def add_anget_and_vehicles(self):

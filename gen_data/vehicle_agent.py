@@ -6,9 +6,10 @@ from queue import Queue
 from threading import Thread
 
 import carla
+import cv2 as cv
 import numpy
 from agents.navigation.behavior_agent import BehaviorAgent  # pylint: disable=import-error
-
+import open3d as o3d
 from params import *
 
 
@@ -140,6 +141,7 @@ class CavCollectThread(Thread):
         sensor_frame_id = 0
         while sensor_frame_id < frame_id:
             for queue in self.data_queue_list:
+
                 sensor_frame = queue.get(True, 1.0)
                 sensor_data = sensor_frame[0]
                 sensor_type_id = sensor_frame[1]
@@ -150,17 +152,29 @@ class CavCollectThread(Thread):
                     continue
 
                 print("\tFrame: {} type: {} | {}".format(sensor_frame_id, sensor_data, sensor_type_id))
-                # For now, only support carla.Sensor which has save_to_disk function (image, lidar)
+                # start = time.time()
+                os.makedirs(filename, exist_ok=True)
                 if sensor_type_id == 'sensor.camera.semantic_segmentation':
                     sensor_data.convert(carla.ColorConverter.CityScapesPalette)
-                    # sensor_data.save_to_disk(filename + '/seg' + '/%010d' % sensor_data.frame)
-                    carla_image_data_array = numpy.ndarray(
-                        shape=(sensor_data.height, sensor_data.width, 4),
-                        dtype=numpy.uint8, buffer=sensor_data.raw_data)
+                    carla_image_data_array = numpy.ndarray(shape=(sensor_data.height, sensor_data.width, 4),
+                                                           dtype=numpy.uint8,
+                                                           buffer=sensor_data.raw_data)
                     os.makedirs(filename + '/seg', exist_ok=True)
-                    numpy.savez_compressed(filename + '/seg' + '/%010d' % sensor_data.frame, a=carla_image_data_array)
+                    cv.imwrite("{}/seg/{:0>10d}.png".format(filename, sensor_data.frame), carla_image_data_array)
+                elif sensor_type_id == 'sensor.camera.rgb':
+                    carla_image_data_array = numpy.ndarray(shape=(sensor_data.height, sensor_data.width, 4),
+                                                           dtype=numpy.uint8,
+                                                           buffer=sensor_data.raw_data)
+                    status = cv.imwrite("{}/{:0>10d}.png".format(filename, sensor_data.frame), carla_image_data_array)
+                elif sensor_type_id == 'sensor.lidar.ray_cast':
+                    points_size = int(len(sensor_data.raw_data) / 16)
+                    lidar_data_array = numpy.ndarray(shape=(points_size, 4),
+                                                     dtype=numpy.dtype('f4'),
+                                                     buffer=sensor_data.raw_data)
+                    numpy.save(filename + '/%010d' % sensor_data.frame, lidar_data_array)
                 else:
                     sensor_data.save_to_disk(filename + '/%010d' % sensor_data.frame)
+                # print("save data time: {}".format(time.time()-start))
                 # TODO: Other sensor support
             # Wait for sensor data ready
             time.sleep(0.05)

@@ -40,11 +40,11 @@ def get_ego_lidar_data_path(ego_vehicle_label, _frame_id):
     ego_vehicle_name = ego_vehicle_label[0] + '_' + ego_vehicle_label[1]
     ego_raw_data_path = raw_data_path / ego_vehicle_name
     raw_data_file     = sorted( ego_raw_data_path.iterdir() )
-    lidar_raw_data_file = ( ego_raw_data_path / raw_data_file[-1] / (_frame_id+'ply') ).as_posix()
+    lidar_raw_data_file = ( ego_raw_data_path / raw_data_file[-1] / (_frame_id+'npy') ).as_posix()
     # ego_raw_data_path = raw_data_path + '/' + ego_vehicle_name
     # raw_data_file = os.listdir(ego_raw_data_path)
     # raw_data_file.sort()
-    # lidar_raw_data_file = ego_raw_data_path + '/' + raw_data_file[-1] + '/' + _frame_id + 'ply'
+    # lidar_raw_data_file = ego_raw_data_path + '/' + raw_data_file[-1] + '/' + _frame_id + 'npy'
     return lidar_raw_data_file
 
 def get_ego_camera_2Dlabel_path(ego_vehicle_label, camera_id, _frame_id):
@@ -61,7 +61,13 @@ def get_ego_camera_2Dlabel_path(ego_vehicle_label, camera_id, _frame_id):
             return camera_2Dlabel_file
 
 def get_raw_lidar_data(lidar_raw_data_file, sensor_rotation):
-    pcd = o3d.io.read_point_cloud(lidar_raw_data_file)
+    # Load raw lidar data xyzi
+    lidar_raw_data = np.load(lidar_raw_data_file)
+    pcd = o3d.geometry.PointCloud()
+    lidar_raw_xyz = np.asarray(lidar_raw_data[:, :3])
+    # print(lidar_raw_xyz.shape)
+    pcd.points = o3d.utility.Vector3dVector(lidar_raw_xyz) # ignore intensity
+    # pcd = o3d.io.read_point_cloud(lidar_raw_data_file)
     R = o3d.geometry.get_rotation_matrix_from_xyz(np.array([np.pi,0,np.pi/2]))
     tmp_R = o3d.geometry.get_rotation_matrix_from_xyz(sensor_rotation)
     # pcd.rotate(R, center=(0,0,0))
@@ -284,7 +290,7 @@ def judge_in_ROI_numbers(other_vehilcle_label,AD_vehicles_location,_frame_id):
         AD_vehicle_path = raw_data_path + '/' + AD_vehicle
         raw_data_file = os.listdir(AD_vehicle_path)
         raw_data_file.sort()
-        lidar_raw_data_file = AD_vehicle_path + '/' + raw_data_file[-1] + '/' + _frame_id + 'ply'
+        lidar_raw_data_file = AD_vehicle_path + '/' + raw_data_file[-1] + '/' + _frame_id + 'npy'
         pcd = get_raw_lidar_data(lidar_raw_data_file, location[2])
         ego_raw_data_path = raw_data_path + '/' + AD_vehicle
         raw_data_file = os.listdir(ego_raw_data_path)

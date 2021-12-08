@@ -39,7 +39,7 @@ class YoloLabel:
 
     def process(self):
         img_path_list = sorted(glob.glob(self.data_path + '/*.png'))
-        img_seg_path_list = sorted(glob.glob(self.data_path + '/seg' + '/*.npz'))
+        img_seg_path_list = sorted(glob.glob(self.data_path + '/seg' + '/*.png'))
         for rgb_img, seg_img in zip(img_path_list, img_seg_path_list):
             self.label_img(rgb_img, seg_img)
 
@@ -50,7 +50,7 @@ class YoloLabel:
         self.image_rgb = None
         self.image_seg = None
         self.image_rgb = cv2.imread(rgb_img_path, cv2.IMREAD_COLOR)
-        self.image_seg = (np.load(seg_img_path))['a']
+        self.image_seg = cv2.imread(seg_img_path, cv2.IMREAD_UNCHANGED)
         if self.image_rgb is None or self.image_seg is None:
             return
         self.image_rgb = cv2.cvtColor(self.image_rgb, cv2.COLOR_RGBA2RGB)
