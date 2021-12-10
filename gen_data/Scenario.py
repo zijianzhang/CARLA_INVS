@@ -393,6 +393,8 @@ class Scenario(object):
                 if sig_interrupt:
                     print("Exit step, wait 2 seconds...")
                     print("Recording on file: %s" % self.client.stop_recorder)
+                    for t in self.sensor_thread:
+                        t.join()
                     time.sleep(2.0)
                     break
 
@@ -569,7 +571,7 @@ class Scenario(object):
         print("SnapShotFrame: {}".format(snap_shot.frame))
         for t in self.sensor_thread:
             t.save_to_disk(tick)
-            # t.join()
+            t.join()
         return tick
 
     def add_anget_and_vehicles(self):

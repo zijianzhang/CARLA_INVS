@@ -160,7 +160,6 @@ class CavCollectThread(Thread):
                                                            dtype=numpy.uint8,
                                                            buffer=sensor_data.raw_data)
                     os.makedirs(filename + '/seg', exist_ok=True)
-                    cv.imwrite("{}/seg/{:0>10d}.png".format(filename, sensor_data.frame), carla_image_data_array)
                 elif sensor_type_id == 'sensor.camera.rgb':
                     carla_image_data_array = numpy.ndarray(shape=(sensor_data.height, sensor_data.width, 4),
                                                            dtype=numpy.uint8,
