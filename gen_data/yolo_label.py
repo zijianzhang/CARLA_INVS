@@ -188,9 +188,9 @@ class YoloLabel:
             if light_color == red:
                 return LABEL_ID.TRAFFIC_LIGHT_RED
             elif light_color == yellow:
-                if self.world_name == 'Carla/Maps/Town10HD_Opt':
-                    return LABEL_ID.TRAFFIC_LIGHT
-                return LABEL_ID.TRAFFIC_LIGHT_YELLOW
+                # if self.world_name == 'Carla/Maps/Town10HD_Opt':
+                return LABEL_ID.TRAFFIC_LIGHT
+                # return LABEL_ID.TRAFFIC_LIGHT_YELLOW
             elif light_color == green:
                 return LABEL_ID.TRAFFIC_LIGHT_GREEN
         else:

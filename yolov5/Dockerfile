@@ -1,7 +1,7 @@
 # YOLOv5 🚀 by Ultralytics, GPL-3.0 license
 
 # Start FROM Nvidia PyTorch image https://ngc.nvidia.com/catalog/containers/nvidia:pytorch
-FROM nvcr.io/nvidia/pytorch:21.05-py3
+FROM nvcr.io/nvidia/pytorch:21.10-py3
 
 # Install linux packages
 RUN apt update && apt install -y zip htop screen libgl1-mesa-glx
@@ -11,8 +11,8 @@ COPY requirements.txt .
 RUN python -m pip install --upgrade pip
 RUN pip uninstall -y nvidia-tensorboard nvidia-tensorboard-plugin-dlprof
 RUN pip install --no-cache -r requirements.txt coremltools onnx gsutil notebook wandb>=0.12.2
-RUN pip install --no-cache -U torch torchvision numpy
-# RUN pip install --no-cache torch==1.9.1+cu111 torchvision==0.10.1+cu111 -f https://download.pytorch.org/whl/torch_stable.html
+RUN pip install --no-cache -U torch torchvision numpy Pillow
+# RUN pip install --no-cache torch==1.10.0+cu113 torchvision==0.11.1+cu113 -f https://download.pytorch.org/whl/cu113/torch_stable.html
 
 # Create working directory
 RUN mkdir -p /usr/src/app
@@ -59,3 +59,6 @@ ADD https://ultralytics.com/assets/Arial.ttf /root/.config/Ultralytics/
 
 # DDP test
 # python -m torch.distributed.run --nproc_per_node 2 --master_port 1 train.py --epochs 3
+
+# GCP VM from Image
+# docker.io/ultralytics/yolov5:latest

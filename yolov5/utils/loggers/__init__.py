@@ -24,7 +24,10 @@ try:
 
     assert hasattr(wandb, '__version__')  # verify package import not local dir
     if pkg.parse_version(wandb.__version__) >= pkg.parse_version('0.12.2') and RANK in [0, -1]:
-        wandb_login_success = wandb.login(timeout=30)
+        try:
+            wandb_login_success = wandb.login(timeout=30)
+        except wandb.errors.UsageError:  # known non-TTY terminal issue
+            wandb_login_success = False
         if not wandb_login_success:
             wandb = None
 except (ImportError, AssertionError):
@@ -135,7 +138,7 @@ class Loggers():
         # Callback runs on training end
         if plots:
             plot_results(file=self.save_dir / 'results.csv')  # save results.png
-        files = ['results.png', 'confusion_matrix.png', *[f'{x}_curve.png' for x in ('F1', 'PR', 'P', 'R')]]
+        files = ['results.png', 'confusion_matrix.png', *(f'{x}_curve.png' for x in ('F1', 'PR', 'P', 'R'))]
         files = [(self.save_dir / f) for f in files if (self.save_dir / f).exists()]  # filter
 
         if self.tb:
@@ -154,3 +157,9 @@ class Loggers():
             else:
                 self.wandb.finish_run()
                 self.wandb = WandbLogger(self.opt)
+
+    def on_params_update(self, params):
+        # Update hyperparams or configs of the experiment
+        # params: A dict containing {param: value} pairs
+        if self.wandb:
+            self.wandb.wandb_run.config.update(params, allow_val_change=True)
