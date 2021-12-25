@@ -7,8 +7,8 @@ sys.path.append(Path(__file__).resolve().parent.parent.as_posix())  # repo path
 sys.path.append(Path(__file__).resolve().parent.as_posix())  # file path
 
 from params import *
-import queue
 import signal
+
 try:
     _egg_file = sorted(Path(CARLA_PATH, 'PythonAPI/carla/dist').expanduser().glob('carla-*%d.*-%s.egg' % (
         sys.version_info.major,
@@ -19,7 +19,6 @@ except IndexError:
     print('CARLA Egg File Not Found.')
     exit()
 
-
 import random
 import weakref
 import logging
@@ -28,21 +27,21 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 import carla
+
+from vehicle_agent import VehicleAgent, CavCollectThread, CavControlThread
+from utils.get2Dlabel import ClientSideBoundingBoxes
+
+try:
+    sys.path.append(Path(CARLA_PATH, 'PythonAPI/carla').expanduser().as_posix())
+    sys.path.append(Path(CARLA_PATH, 'PythonAPI/examples').expanduser().as_posix())
+except IndexError:
+    pass
+
 SpawnActor = carla.command.SpawnActor
 SetAutopilot = carla.command.SetAutopilot
 FutureActor = carla.command.FutureActor
 ApplyVehicleControl = carla.command.ApplyVehicleControl
 Attachment = carla.AttachmentType
-try:
-    sys.path.append(Path(CARLA_PATH, 'PythonAPI/carla').expanduser().as_posix())
-    sys.path.append(Path(CARLA_PATH, 'PythonAPI/examples').expanduser())
-except IndexError:
-    pass
-
-
-from vehicle_agent import VehicleAgent, CavCollectThread, CavControlThread
-from utils.get2Dlabel import ClientSideBoundingBoxes
-
 sig_interrupt = False
 
 
@@ -120,7 +119,7 @@ class Args(object):
         self.calibration[0, 2] = self.image_width / 2.0
         self.calibration[1, 2] = self.image_height / 2.0
         self.calibration[0, 0] = self.calibration[1, 1] = self.image_width / (
-                    2.0 * np.tan(self.VIEW_FOV * np.pi / 360.0))
+                2.0 * np.tan(self.VIEW_FOV * np.pi / 360.0))
 
         self.sample_frequence = 1  # 20frames/s
 
@@ -222,6 +221,7 @@ class Server(object):
     def __init__(self):
         pass
 
+
 class Scenario(object):
     def __init__(self, args):
         self.client = carla.Client(args.host, args.port)
@@ -240,7 +240,8 @@ class Scenario(object):
         self.CAV_blueprints = self.world.get_blueprint_library().filter('vehicle.tesla.model3')
         # sensor information
         self.sensor_attribute = [['sensor.camera.rgb', carla.ColorConverter.Raw, 'Camera RGB', {}],
-                                 ['sensor.camera.semantic_segmentation', carla.ColorConverter.CityScapesPalette, 'Camera Semantic Segmentation (CityScapes Palette)', {}],
+                                 ['sensor.camera.semantic_segmentation', carla.ColorConverter.CityScapesPalette,
+                                  'Camera Semantic Segmentation (CityScapes Palette)', {}],
                                  ['sensor.lidar.ray_cast', None, 'Lidar (Ray-Cast)', {}]]
         self.sensor_transform = [(carla.Transform(carla.Location(x=0, z=1.65)), Attachment.Rigid),
                                  (carla.Transform(carla.Location(x=0, z=1.65)), Attachment.Rigid),
@@ -383,9 +384,9 @@ class Scenario(object):
         start = self.world.tick()
         print("Recording on file: %s" % self.client.start_recorder(args.recorder_filename))
         if self.dynamic_weather:
-                self.weather.tick(1)
-                self.world.set_weather(self.weather.weather)
-                print('start from frameID: %s.' % start)
+            self.weather.tick(1)
+            self.world.set_weather(self.weather.weather)
+            print('start from frameID: %s.' % start)
         while True:
             if args.sync and self.synchronous_master:
                 now = self.run_step()
@@ -564,7 +565,7 @@ class Scenario(object):
         s = time.time()
         tick = self.world.tick(seconds=60.0)
         print("-------------")
-        print("WorldTick: {}, dur= {}".format(tick, time.time()-s))
+        print("WorldTick: {}, dur= {}".format(tick, time.time() - s))
         weak_self = weakref.ref(self)
         snap_shot = self.world.get_snapshot()
         self.on_world_tick(weak_self, snap_shot)
