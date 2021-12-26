@@ -17,7 +17,7 @@ python3 yolo_label.py --record_id=record2021_1105_2340
 
 ## Train yolov5
 ```
- python3 yolov5/train.py --img 640 --batch 8 --epochs 50 --data raw_data/record2021_1106_0049/vehicle.tesla.model3_248/yolo_coco_carla.yaml --cfg yolov5/models/yolov5s.yaml  --weights yolov5s.ptpython3
+ python3 yolov5/train.py --img 640 --batch 8 --epochs 100 --data raw_data/record2021_1106_0049/vehicle.tesla.model3_248/yolo_coco_carla.yaml --cfg yolov5/models/yolov5s.yaml  --weights yolov5s.pt
 ```
 
 ## Test Result

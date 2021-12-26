@@ -5,7 +5,7 @@ from pathlib import Path
 
 sys.path.append(Path(__file__).resolve().parent.parent.as_posix())  # repo path
 sys.path.append(Path(__file__).resolve().parent.as_posix())  # file path
-
+from gen_data.utils.map_visulization import MapVisualization
 from params import *
 import signal
 
@@ -161,8 +161,8 @@ class Map(object):
         for tmp_transform in self.tmp_spawn_points:
             tmp_location = tmp_transform.location
             for edge in check_spawn_ROI:
-                if tmp_location.x > edge[0] and tmp_location.x < edge[1] and tmp_location.y > edge[
-                    2] and tmp_location.y < edge[3]:
+                if edge[0] < tmp_location.x < edge[1] \
+                        and edge[2] < tmp_location.y < edge[3]:
                     tmp_spawn_points.append(tmp_transform)
                     tmpx.append(tmp_location.x)
                     tmpy.append(tmp_location.y)
@@ -247,6 +247,8 @@ class Scenario(object):
                                  (carla.Transform(carla.Location(x=0, z=1.65)), Attachment.Rigid),
                                  (carla.Transform(carla.Location(x=-0.27, z=1.73)), Attachment.Rigid)]
         self.args = args
+
+        self.map_viz = MapVisualization(self.world)
         # weak_self = weakref.ref(self)
         # self.world.on_tick(lambda world_snapshot: self.on_world_tick(weak_self, world_snapshot))
 
@@ -346,26 +348,8 @@ class Scenario(object):
             self.stop_look(args)
             pass
 
-    def start_look(self, args):
-        self.synchronous_master = False
-        if args.sync:
-            settings = self.world.get_settings()
-            if not settings.synchronous_mode:
-                self.synchronous_master = True
-                self.traffic_manager.set_synchronous_mode(True)
-                settings.synchronous_mode = True
-                settings.fixed_delta_seconds = args.fixed_delta_seconds
-                self.world.apply_settings(settings)
-            else:
-                self.synchronous_master = False
-                print('synchronous_master is False.')
-        tmpx, tmpy = [], []
-        for tmp_transform in self.map.initial_spawn_points:
-            tmp_location = tmp_transform.location
-            tmpx.append(tmp_location.x)
-            # tmpx.append(((tmp_location.x - 100) * -1) + 100)
-            tmpy.append(tmp_location.y)
-        self.map.plot_points(tmpx, tmpy)
+    def start_look(self):
+        self.map_viz.show_spawn_points()
 
     def stop_look(self, args):
         print(args.sync)

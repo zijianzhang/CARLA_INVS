@@ -3,3 +3,6 @@ plyfile
 notebook
 numpy
 matplotlib
+opencv-python
+pandas
+yaml

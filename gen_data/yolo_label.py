@@ -1,18 +1,17 @@
 #!/usr/bin/python3
+import argparse
+import cv2
+import glob
 import sys
 from pathlib import Path
+import numpy as np
+import pandas as pd
+import yaml
 
 sys.path.append(Path(__file__).resolve().parent.parent.as_posix())  # repo path
 sys.path.append(Path(__file__).resolve().parent.as_posix())  # file path
-
 from params import *
-import os
-import cv2
-import numpy as np
-import glob
-import yaml
-import argparse
-import pandas as pd
+
 
 LABEL_DATAFRAME = pd.DataFrame(columns=['raw_value', 'color', 'coco_names_index'],
                                data=[
@@ -104,10 +103,10 @@ class YoloLabel:
                 if y + h >= max_y or x + w >= max_x:
                     continue
 
-                if self.debug:
+                # if self.debug:
                     # Draw label info to image
-                    cv2.putText(self.preview_img, COCO_NAMES[coco_id], (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (36, 255, 12), 1)
-                    cv2.rectangle(self.image_rgb, (x, y), (x + w, y + h), (0, 255, 0), 1)
+                    # cv2.putText(self.preview_img, COCO_NAMES[coco_id], (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (36, 255, 12), 1)
+                    # cv2.rectangle(self.image_rgb, (x, y), (x + w, y + h), (0, 255, 0), 1)
                 label_info = "{} {} {} {} {}".format(coco_id,
                                                      float(x + (w / 2.0)) / width,
                                                      float(y + (h / 2.0)) / height,
@@ -124,17 +123,17 @@ class YoloLabel:
         if len(labels_all) > 0:
             os.makedirs(self.label_out_path, exist_ok=True)
             os.makedirs(self.image_out_path, exist_ok=True)
-            print("image\t\t\twidth\theight\n{}\t{}\t{}".format(img_name, width, height))
-            print("Got {} labels".format(len(labels_all)))
+            # print("image\t\t\twidth\theight\n{}\t{}\t{}".format(img_name, width, height))
+            # print("Got {} labels".format(len(labels_all)))
             cv2.imwrite(self.image_out_path.as_posix() + '/' + os.path.splitext(img_name)[0] + '.jpg', self.image_rgb)
-            print(self.image_rgb.shape)
+            # print(self.image_rgb.shape)
             with open(self.label_out_path.as_posix() + '/' + os.path.splitext(img_name)[0] + '.txt', "w") as f:
                 for label in labels_all:
                     f.write(label)
                     f.write('\n')
-            print("Label output path: {}".format(self.label_out_path))
+            # print("Label output path: {}".format(self.label_out_path))
             self.dump_yaml(self.data_output_path.as_posix())
-            print("******")
+            # print("******")
             return
 
     def check_id(self, rgb_img_path, seg_img_path):
