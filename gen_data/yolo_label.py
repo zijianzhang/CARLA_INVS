@@ -1,5 +1,7 @@
 #!/usr/bin/python3
 import argparse
+import time
+
 import cv2
 import glob
 import sys
@@ -7,6 +9,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import yaml
+
+from multiprocessing.dummy import Pool as ThreadPool
 
 sys.path.append(Path(__file__).resolve().parent.parent.as_posix())  # repo path
 sys.path.append(Path(__file__).resolve().parent.as_posix())  # file path
@@ -54,38 +58,44 @@ class YoloLabel:
         self.preview_img = None
         self.rec_pixels_min = 150
         self.debug = debug
+        self.thread_pool = ThreadPool()
 
     def process(self):
         img_path_list = sorted(glob.glob(self.data_path + '/*.png'))
         img_seg_path_list = sorted(glob.glob(self.data_path + '/seg' + '/*.png'))
-        for rgb_img, seg_img in zip(img_path_list, img_seg_path_list):
-            self.label_img(rgb_img, seg_img)
+        start = time.time()
+        self.thread_pool.starmap(self.label_img, zip(img_path_list, img_seg_path_list))
+        # for rgb_img, seg_img in zip(img_path_list, img_seg_path_list):
+        #     self.label_img(rgb_img, seg_img)
+        self.thread_pool.close()
+        self.thread_pool.join()
+        print("cost: {}s".format(time.time()-start))
 
     def label_img(self, rgb_img_path, seg_img_path):
         success = self.check_id(rgb_img_path, seg_img_path)
         if not success:
             return
-        self.image_rgb = None
-        self.image_seg = None
-        self.image_rgb = cv2.imread(rgb_img_path, cv2.IMREAD_COLOR)
-        self.image_seg = cv2.imread(seg_img_path, cv2.IMREAD_UNCHANGED)
-        if self.image_rgb is None or self.image_seg is None:
+        image_rgb = None
+        image_seg = None
+        image_rgb = cv2.imread(rgb_img_path, cv2.IMREAD_COLOR)
+        image_seg = cv2.imread(seg_img_path, cv2.IMREAD_UNCHANGED)
+        if image_rgb is None or image_seg is None:
             return
-        self.image_rgb = cv2.cvtColor(self.image_rgb, cv2.COLOR_RGBA2RGB)
-        self.image_seg = cv2.cvtColor(self.image_seg, cv2.COLOR_BGRA2RGB)
+        image_rgb = cv2.cvtColor(image_rgb, cv2.COLOR_RGBA2RGB)
+        image_seg = cv2.cvtColor(image_seg, cv2.COLOR_BGRA2RGB)
         img_name = os.path.basename(rgb_img_path)
-        height, width, _ = self.image_rgb.shape
+        height, width, _ = image_rgb.shape
 
         labels_all = []
         for index, label_info in LABEL_DATAFRAME.iterrows():
             seg_color = label_info['color']
             coco_id = label_info['coco_names_index']
 
-            mask = (self.image_seg == seg_color)
+            mask = (image_seg == seg_color)
             tmp_mask = (mask.sum(axis=2, dtype=np.uint8) == 3)
             mono_img = np.array(tmp_mask * 255, dtype=np.uint8)
 
-            self.preview_img = self.image_rgb
+            preview_img = image_rgb
             # self.preview_img = self.image_seg
             # cv2.imshow("seg", self.preview_img)
             # cv2.imshow("mono", mono_img)
@@ -99,14 +109,13 @@ class YoloLabel:
                 # cv2.rectangle(self.preview_img, (x, y), (x + w, y + h), (0, 255, 0), 1)
                 # cv2.imshow("rect", self.preview_img)
                 # cv2.waitKey()
-                max_y, max_x, _ = self.image_rgb.shape
+                max_y, max_x, _ = image_rgb.shape
                 if y + h >= max_y or x + w >= max_x:
                     continue
 
-                # if self.debug:
                     # Draw label info to image
-                    # cv2.putText(self.preview_img, COCO_NAMES[coco_id], (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (36, 255, 12), 1)
-                    # cv2.rectangle(self.image_rgb, (x, y), (x + w, y + h), (0, 255, 0), 1)
+                cv2.putText(preview_img, COCO_NAMES[coco_id], (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (36, 255, 12), 1)
+                cv2.rectangle(image_rgb, (x, y), (x + w, y + h), (0, 255, 0), 1)
                 label_info = "{} {} {} {} {}".format(coco_id,
                                                      float(x + (w / 2.0)) / width,
                                                      float(y + (h / 2.0)) / height,
@@ -125,7 +134,7 @@ class YoloLabel:
             os.makedirs(self.image_out_path, exist_ok=True)
             # print("image\t\t\twidth\theight\n{}\t{}\t{}".format(img_name, width, height))
             # print("Got {} labels".format(len(labels_all)))
-            cv2.imwrite(self.image_out_path.as_posix() + '/' + os.path.splitext(img_name)[0] + '.jpg', self.image_rgb)
+            cv2.imwrite(self.image_out_path.as_posix() + '/' + os.path.splitext(img_name)[0] + '.jpg', image_rgb)
             # print(self.image_rgb.shape)
             with open(self.label_out_path.as_posix() + '/' + os.path.splitext(img_name)[0] + '.txt', "w") as f:
                 for label in labels_all:
