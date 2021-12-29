@@ -1,18 +1,27 @@
 #!/usr/bin/env python3
 from pathlib import Path
 from os import chdir
+import os
 
-CARLA_PATH = Path('~/CARLA_0.9.10').expanduser() #Path('~/CARLA').expanduser()
+# Get CARLA Root Path
+CARLA_PATH = os.environ.get('CARLA_ROOT')
+if len(CARLA_PATH) == 0:
+    CARLA_PATH = CARLA_PATH = os.environ.get('CARLA_PATH')
+    if len(CARLA_PATH) == 0:
+        CARLA_PATH = Path('~/carla').expanduser()
+print("CARLA_PATH: {}".format(CARLA_PATH))
+
+# Project Root Path
 ROOT_PATH  = Path(__file__).parent
-
+print("Project Root PATH: {}".format(ROOT_PATH))
 ##for gen_data
 LOG_PATH   = ROOT_PATH / 'log'
 RAW_DATA_PATH  = ROOT_PATH / 'raw_data'
 COOK_DATA_PATH = ROOT_PATH / 'dataset'
 #https://carla.readthedocs.io/en/latest/core_map/#changing-the-map
 TOWN_MAP = ['Town01', 'Town02', 'Town03', 'Town04', 'Town05'][1]
-RAW_DATA_START  = 60#frame
-RAW_DATA_END    = -10#frame
+RAW_DATA_START  = 5#frame
+RAW_DATA_END    = 1800#frame
 RAW_DATA_FREQ   = 1#Hz
 RAW_DATA_FREQ_ALT=1#Hz, for img_list generation
 

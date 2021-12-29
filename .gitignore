@@ -1,4 +1,7 @@
 .vscode
+.idea
+*.pt
+yolov5/*.pt
 __pycache__
 # for gen_data
 log
