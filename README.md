@@ -28,7 +28,7 @@
 
 - Ubuntu 18.04
 - Python 3.7+
-- CARLA >= 0.9.8, <=0.9.10
+- CARLA >= 0.9.12
 - CUDA>=10.0
 - pytorch<=1.4.0
 - llvm>=10.0
@@ -38,7 +38,7 @@
 1. Clone this repository to your workspace
 
       ```
-     git clone https://github.com/lasso-sustech/CARLA_INVS.git --branch=main --depth=1
+     git clone https://github.com/zijianzhang/CARLA_INVS --depth=1
      ```
 
 2. Enter the directory "CARLA_INVS" and install dependencies with `make`
@@ -212,8 +212,10 @@ python3 preprocess.py create_kitti_infos record2020_xxxx_xxxx vhicle_id
 
 ### Authors
 
-Zijian Zhang
+* [Zijian Zhang](https://github.com/zijianzhang)
 
-[Yuncong Hong](https://iamhyc.github.io)
+* [Yuncong Hong](https://iamhyc.github.io)
 
-[Shuai Wang](https://faculty.sustech.edu.cn/wangs3/en/)
+* [Shuai Wang](https://faculty.sustech.edu.cn/wangs3/en/)
+
+* [Chengyang Li](https://github.com/KevinLADLee)

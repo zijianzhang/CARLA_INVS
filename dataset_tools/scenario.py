@@ -1,41 +1,25 @@
 #!/usr/bin/env python3
 import sys
+import signal
 import time
 from pathlib import Path
-
-sys.path.append(Path(__file__).resolve().parent.parent.as_posix())  # repo path
-sys.path.append(Path(__file__).resolve().parent.as_posix())  # file path
-from gen_data.utils.map_visulization import MapVisualization
-from params import *
-import signal
-
-try:
-    _egg_file = sorted(Path(CARLA_PATH, 'PythonAPI/carla/dist').expanduser().glob('carla-*%d.*-%s.egg' % (
-        sys.version_info.major,
-        'win-amd64' if os.name == 'nt' else 'linux-x86_64'
-    )))[0].as_posix()
-    sys.path.append(_egg_file)
-except IndexError:
-    print('CARLA Egg File Not Found.')
-    exit()
-
 import random
 import weakref
 import logging
 import open3d as o3d
 import numpy as np
 import matplotlib.pyplot as plt
-
 import carla
 
-from vehicle_agent import VehicleAgent, CavCollectThread, CavControlThread
-from utils.get2Dlabel import ClientSideBoundingBoxes
 
-try:
-    sys.path.append(Path(CARLA_PATH, 'PythonAPI/carla').expanduser().as_posix())
-    sys.path.append(Path(CARLA_PATH, 'PythonAPI/examples').expanduser().as_posix())
-except IndexError:
-    pass
+sys.path.append(Path(__file__).resolve().parent.parent.as_posix())  # repo path
+from params import *
+from dataset_tools.vehicle_agent import VehicleAgent, CavCollectThread, CavControlThread
+from dataset_tools.utils.get2Dlabel import ClientSideBoundingBoxes
+from dataset_tools.utils.map_visulization import MapVisualization
+
+
+
 
 SpawnActor = carla.command.SpawnActor
 SetAutopilot = carla.command.SetAutopilot

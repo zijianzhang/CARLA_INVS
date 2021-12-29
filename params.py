@@ -6,10 +6,11 @@ import os
 # Get CARLA Root Path
 CARLA_PATH = os.environ.get('CARLA_ROOT')
 if len(CARLA_PATH) == 0:
-    CARLA_PATH = CARLA_PATH = os.environ.get('CARLA_PATH')
+    CARLA_PATH = os.environ.get('CARLA_PATH')
     if len(CARLA_PATH) == 0:
         CARLA_PATH = Path('~/carla').expanduser()
 print("CARLA_PATH: {}".format(CARLA_PATH))
+CARLA_AGENT_PYTHON_PATH = "{}/PythonAPI/carla".format(CARLA_PATH)
 
 # Project Root Path
 ROOT_PATH  = Path(__file__).parent

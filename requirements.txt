@@ -5,4 +5,5 @@ numpy
 matplotlib
 opencv-python
 pandas
-yaml
+shapely
+carla>=0.9.12

@@ -1,16 +1,18 @@
 #!/usr/bin/python3
 import copy
+import carla
+import cv2 as cv
+import sys
 import time
 import weakref
 from queue import Queue
 from threading import Thread
-
-import carla
-import cv2 as cv
 import numpy
-from agents.navigation.behavior_agent import BehaviorAgent  # pylint: disable=import-error
-import open3d as o3d
+from pathlib import Path
+sys.path.append(Path(__file__).resolve().parent.parent.as_posix())  # repo path
 from params import *
+sys.path.append(CARLA_AGENT_PYTHON_PATH)
+from agents.navigation.behavior_agent import BehaviorAgent  # pylint: disable=import-error
 
 
 class VehicleAgent(BehaviorAgent):
