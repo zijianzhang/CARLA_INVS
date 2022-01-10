@@ -343,8 +343,7 @@ def process_each_frame(_frame):
     _frame_label_file_path = Path(label_file_path, _frame).as_posix()
     shutil.copy(_frame_label_file_path, global_label_file_path)
     labels = np.loadtxt(_frame_label_file_path, dtype='str', delimiter=' ')
-    # tmp_car_id = ['282','274','284','275','276']
-    # AD_vehicles = [v for v in raw_data_path.iterdir() if 'vehicle' in v]
+
     AD_vehicles = [v for v in os.listdir(str(raw_data_path)) if 'vehicle' in v]
     AD_vehicles_location = find_Ad_vehicles_location(AD_vehicles, labels)
 

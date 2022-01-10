@@ -1,24 +1,21 @@
 #!/usr/bin/env python3
+import carla
 import sys
 import signal
 import time
-from pathlib import Path
 import random
 import weakref
 import logging
 import open3d as o3d
 import numpy as np
 import matplotlib.pyplot as plt
-import carla
 
-
+from pathlib import Path
 sys.path.append(Path(__file__).resolve().parent.parent.as_posix())  # repo path
 from params import *
 from dataset_tools.vehicle_agent import VehicleAgent, CavCollectThread, CavControlThread
-from dataset_tools.utils.get2Dlabel import ClientSideBoundingBoxes
+from dataset_tools.utils.get_2d_label import ClientSideBoundingBoxes
 from dataset_tools.utils.map_visulization import MapVisualization
-
-
 
 
 SpawnActor = carla.command.SpawnActor
@@ -201,11 +198,6 @@ class Map(object):
                 return hd, cav
 
 
-class Server(object):
-    def __init__(self):
-        pass
-
-
 class Scenario(object):
     def __init__(self, args):
         self.client = carla.Client(args.host, args.port)
@@ -235,6 +227,14 @@ class Scenario(object):
         self.map_viz = MapVisualization(self.world)
         # weak_self = weakref.ref(self)
         # self.world.on_tick(lambda world_snapshot: self.on_world_tick(weak_self, world_snapshot))
+
+    def set_traffic_light_time(self):
+        actor_list = self.world.get_actors()
+        for actor in actor_list:
+            if isinstance(actor, carla.TrafficLight):
+                actor.set_red_time(1.5)
+                actor.set_green_time(2.0)
+                actor.set_yellow_time(0.01)
 
     @staticmethod
     def parse_transform(transform):
@@ -310,26 +310,11 @@ class Scenario(object):
                     # lidar_to_camera_matrix = ClientSideBoundingBoxes.get_lidar_to_camera_matrix(lidar, sensor)
                     # calib_info.append(lidar_to_camera_matrix)
 
-    def look_for_spawn_points(self, args):
+    def look_for_spawn_points(self):
         try:
-            self.start_look(args)
-            if not args.sync or not self.synchronous_master:
-                self.world.wait_for_tick()
-            else:
-                start = self.world.tick()
-            while True:
-                if args.sync and self.synchronous_master:
-                    now = self.run_step()
-                    if (now - start) % 1000 == 0:
-                        print('Frame ID:' + str(now))
-                else:
-                    self.world.wait_for_tick()
+            self.start_look()
         finally:
-            try:
-                print('stop from frameID: %s.' % now)
-            finally:
-                pass
-            self.stop_look(args)
+            return
             pass
 
     def start_look(self):
@@ -355,6 +340,7 @@ class Scenario(object):
             self.weather.tick(1)
             self.world.set_weather(self.weather.weather)
             print('start from frameID: %s.' % start)
+        self.set_traffic_light_time()
         while True:
             if args.sync and self.synchronous_master:
                 now = self.run_step()
@@ -650,7 +636,7 @@ if __name__ == "__main__":
     args = Args(sys.argv)
     scenario = Scenario(args)
     if args.task == 'spawn':
-        scenario.look_for_spawn_points(args)
+        scenario.look_for_spawn_points()
     elif args.task == 'record':
         scenario.generate_data(args)
     elif args.task == 'replay':

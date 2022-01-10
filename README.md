@@ -1,5 +1,5 @@
 # Distributed Dynamic Map Fusion and Federated Learning in CARLA Simulation
-<img src="./preview/test2.png" width = "400" alt="图片名称" align=center /><img src="./preview/test1.png" width = "400" alt="图片名称" align=center />
+<img src="./docs/img/test2.png" width = "400" alt="图片名称" align=center /><img src="./docs/img/test1.png" width = "400" alt="图片名称" align=center />
 
 
 
@@ -26,12 +26,10 @@
 
 ## Dependency
 
-- Ubuntu 18.04
-- Python 3.7+
+- Ubuntu 20.04
+- Python3 Only
 - CARLA >= 0.9.12
-- CUDA>=10.0
-- pytorch<=1.4.0
-- llvm>=10.0
+- CUDA>=10.2
 
 ## Installation
 
@@ -48,11 +46,10 @@
      
      > It uses `apt` and `pip3` with network access. You can try speed up downloading with fast mirror sites.
      
-3.  Download and extract the CARLA simulator somewhere (e.g., `~/CARLA`), and update `CARLA_PATH` in `params.py` with **absolute path** to the CARLA folder location.
+3. Download and extract the CARLA simulator somewhere (e.g., `~/CARLA`), and update `CARLA_PATH` in `params.py` with **absolute path** to the CARLA folder location. 
+Also, you cloud use the environment variable `CARLA_ROOT` to specific path to CARLA.
 
-> This repository is composed of three components: `gen_data` for dataset generation and visualization, `PCDet` for training and testing, `fusion` for global map fusion and visualization.
->
-> The three components share the same configuration file `params.py`.
+> Components in this project share the same configuration file `params.py`.
 
 
 
@@ -64,15 +61,15 @@
 1. start up `CarlaUE4.sh` in your `CARLA_PATH` firstly and run the following script in shell to look for vehicles spawn points with *point_id*.
 
    ```bash
-   python3 gen_data/Scenario.py spawn
+   python3 dataset_tools/scenario.py spawn
    ```
 
-   <img src="./preview/carla.png" width = "250" height = "250"  alt="图片名称" align=center /> <img src="./preview/fig2.png" width = "250" alt="图片名称" align=center />
+   <img src="./docs/img/carla.png" width = "250" height = "250"  alt="图片名称" align=center /> <img src="./docs/img/fig2.png" width = "250" alt="图片名称" align=center />
 
 2. run the following script to generate multi-agent raw data
 
    ```bash
-   python3 gen_data/Scenario.py record [x_1,...x_N] [y_1,...y_M]
+   python3 dataset_tools/scenario.py record [x_1,...x_N] [y_1,...y_M]
    ```
 
    where `x_1,...,x_N` is list of *point_ids* (separated by comma) for *human-driven vehicles*, and `y_1,...,y_M` for *autonomous vehicles* with sensors installation.
@@ -82,7 +79,7 @@
 3. Run the following script to transform raw data to KITTI format
 
    ```bash
-   python3 gen_data/Process.py raw_data/record2020_xxxx_xxxx
+   python3 dataset_tools/process.py raw_data/record2020_xxxx_xxxx
    ```
 
    and the cooked KITTI format data will be put at `$ROOT_PATH/dataset`
@@ -91,10 +88,10 @@
 
    ```bash
    # The vehicle_id is the intelligent vehicle ID, and the frame_ID is the index of dataset.
-   python3 gen_data/Visualization.py dataset/record2020_xxxx_xxxx vehicle_id frame_id
+   python3 dataset_tools/visualization.py dataset/record2020_xxxx_xxxx vehicle_id frame_id
    ```
 
-<img src="./preview/fig3.png" width = "250" alt="图片名称" align=center />
+<img src="./docs/img/fig3.png" width = "250" alt="图片名称" align=center />
 
 ## Training Procedures
 

@@ -21,7 +21,12 @@ LABEL_DATAFRAME = pd.DataFrame(columns=['raw_value', 'color', 'coco_names_index'
                                data=[
                                      # [ 4, (220, 20, 60), 0],
                                      [18, (250, 170, 30), 9],
-                                     [12, (220, 220,  0), 80]])
+                                     [12, (220, 220,  0), 80],
+                               ])
+
+TL_LIGHT_LABEL = {'DEFAULT': 9,
+                  'RED': 82,
+                  'GREEN': 81}
 
 LABEL_COLORS = np.array([
     # (220, 20, 60),   # Pedestrian
@@ -42,7 +47,7 @@ COCO_NAMES = ['person', 'bicycle', 'car', 'motorcycle', 'airplane', 'bus', 'trai
               'cell phone',
               'microwave', 'oven', 'toaster', 'sink', 'refrigerator', 'book', 'clock', 'vase', 'scissors',
               'teddy bear',
-              'hair drier', 'toothbrush', 'traffic sign']
+              'hair drier', 'toothbrush', 'traffic sign', 'traffic light green', 'traffic light red']
 
 
 class YoloLabel:
@@ -57,6 +62,7 @@ class YoloLabel:
         self.image_seg = None
         self.preview_img = None
         self.rec_pixels_min = 150
+        self.color_pixels_min = 30
         self.debug = debug
         self.thread_pool = ThreadPool()
 
@@ -113,9 +119,15 @@ class YoloLabel:
                 if y + h >= max_y or x + w >= max_x:
                     continue
 
-                    # Draw label info to image
+                if coco_id == TL_LIGHT_LABEL["DEFAULT"]:
+                    coco_id = self.check_color(image_rgb[y:y + h, x:x + w, :])
+
+                # DEBUG START
+                # Draw label info to image
                 cv2.putText(preview_img, COCO_NAMES[coco_id], (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (36, 255, 12), 1)
                 cv2.rectangle(image_rgb, (x, y), (x + w, y + h), (0, 255, 0), 1)
+                # DEBUG END
+
                 label_info = "{} {} {} {} {}".format(coco_id,
                                                      float(x + (w / 2.0)) / width,
                                                      float(y + (h / 2.0)) / height,
@@ -166,6 +178,51 @@ class YoloLabel:
         with open(dataset_path + '/../yolo_coco_carla.yaml', 'w') as file:
             yaml.dump(dict_file, file)
 
+    def decrease_brightness(self, img, value=30):
+        h, s, v = cv2.split(img)
+        lim = 0 + value
+        v[v < lim] = lim
+        v[v >= lim] -= lim
+        final_hsv = cv2.merge((h, s, v))
+        return final_hsv
+
+    def check_color(self, img):
+        hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+        hsv_img = self.decrease_brightness(hsv, 80)
+
+        red_min = np.array([0, 5, 150])
+        red_max = np.array([15, 255, 255])
+        red_min_2 = np.array([175, 5, 150])
+        red_max_2 = np.array([180, 255, 255])
+
+        yellow_min = np.array([25, 5, 150])
+        yellow_max = np.array([35, 180, 255])
+
+        green_min = np.array([35, 5, 150])
+        green_max = np.array([90, 255, 255])
+
+        red_thresh = cv2.inRange(hsv_img, red_min, red_max) + cv2.inRange(hsv_img, red_min_2, red_max_2)
+        yellow_thresh = cv2.inRange(hsv_img, yellow_min, yellow_max)
+        green_thresh = cv2.inRange(hsv_img, green_min, green_max)
+
+        red_blur = cv2.medianBlur(red_thresh, 5)
+        yellow_blur = cv2.medianBlur(yellow_thresh, 5)
+        green_blur = cv2.medianBlur(green_thresh, 5)
+
+        red = cv2.countNonZero(red_blur)
+        yellow = cv2.countNonZero(yellow_blur)
+        green = cv2.countNonZero(green_blur)
+
+        light_color = max(red, green, yellow)
+        if light_color > self.color_pixels_min:
+            if light_color == red:
+                return TL_LIGHT_LABEL["RED"]
+            elif light_color == green:
+                return TL_LIGHT_LABEL["GREEN"]
+            else:
+                return TL_LIGHT_LABEL["DEFAULT"]
+        else:
+            return TL_LIGHT_LABEL["DEFAULT"]
 
 def main():
     argparser = argparse.ArgumentParser(description=__doc__)
