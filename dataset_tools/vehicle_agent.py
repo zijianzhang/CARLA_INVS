@@ -101,6 +101,7 @@ class CavCollectThread(Thread):
                 # bp.set_attribute('dropoff_intensity_limit', '1.0')
                 # bp.set_attribute('dropoff_zero_intensity', '0.0')
                 bp.set_attribute('noise_stddev', '0.02')
+
             sensor_attribute_raw.append(bp)
             sensor_actor = self._parent.get_world().spawn_actor(
                 bp,
