@@ -28,7 +28,7 @@
 @article{FLCAV,
   title={Federated learning meets connected autonomous vehicle perception: Principles and implementation},
   author={Wang, Shuai and Li, Chengyang and Hao, Qi and Ng, Derrick Wing Kwan and Eldar, Yonina and Poor, Vincent},
-  journal={IEEE Transactions on Communications},
+  journal={submitted to IEEE for possible publication},
   year={2021},
   publisher={IEEE}
 }
