@@ -16,8 +16,16 @@
 	year={2021}
 }
 
+@article{EFL2022
+	author={S. {Wang} and Y. {Hong} and R. {Wang} and Q. {Hao} and Y. C. {Wu} and D. W. K. {Ng}
+	title={Edge federated learning via unit-modulus over-the-air computation},
+	booktitle={IEEE Transactions on Communications},
+	year={2022}
+}
+
+
 @article{FLCAV2021
-	author={S. {Wang} and Q. {Hao} and D. W. K. {Ng} and Y. C. {Eldar} and H. V. {Poor},
+	author={S. {Wang} and C. {Li} and Q. {Hao} and D. W. K. {Ng} and Y. C. {Eldar} and H. V. {Poor},
 	title={Federated learning meets connected autonomous vehicle perception: Principles and implementation},
 	booktitle={submitted to IEEE for possible publication},
 	year={2021}
