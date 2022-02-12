@@ -11,7 +11,7 @@
 
 @inproceedings{INVS,
   title={Distributed dynamic map fusion via federated learning for intelligent networked vehicles},
-  author={Zhang, Zijian and Wang, Shuai and Hong, Yuncong and Zhou, Liangkai and Hao, Qi},
+  author={Zijian Zhang and Shuai Wang and Yuncong Hong and Liangkai Zhou and Qi Hao},
   booktitle={Proceedings of the IEEE International Conference on Robotics and Automation (ICRA)},
   year={2021}
 }
@@ -19,7 +19,7 @@
 
 @article{EFL,
   title={Edge federated learning via unit-modulus over-the-air computation},
-  author={Wang, Shuai and Hong, Yuncong and Wang, Rui and Hao, Qi and Wu, Yik-Chung and Ng, Derrick Wing Kwan},
+  author={Shuai Wang and Yuncong Hong and Rui Wang and Qi Hao and Yik-Chung Wu and Derrick Wing Kwan Ng},
   journal={IEEE Transactions on Communications},
   year={2022},
   publisher={IEEE}
@@ -27,7 +27,7 @@
 
 @article{FLCAV,
   title={Federated learning meets connected autonomous vehicle perception: Principles and implementation},
-  author={Wang, Shuai and Li, Chengyang and Hao, Qi and Ng, Derrick Wing Kwan and Eldar, Yonina and Poor, Vincent},
+  author={Shuai Wang and Chengyang Li and Qi Hao and Derrick Wing Kwan Ng and Yonina C. Eldar and H. Vincent Poor},
   journal={submitted to IEEE for possible publication},
   year={2021},
   publisher={IEEE}
