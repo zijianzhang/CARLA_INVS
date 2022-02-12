@@ -8,28 +8,12 @@
 ## Citation
 
 ```latex
-@INPROCEEDINGS{INVS2021
-	author={Z. {Zhang} and S. {Wang} and Y. {Hong} and L. {Zhou} and Q. {Hao},
-	title={Distributed dynamic map fusion via federated learning for intelligent networked vehicles},
-	booktitle={2021 {IEEE} International Conference on Robotics and Automation, {ICRA}
-               2021, Xi’an, China, May 2021},
-	year={2021}
-}
+[INVS] Z. Zhang, S. Wang and Y. Hong and L. Zhou and Q. Hao, ``Distributed dynamic map fusion via federated learning for intelligent networked vehicles,'' IEEE International Conference on Robotics and Automation (ICRA), Xi’an, China, May 2021.
 
-@article{EFL2022
-	author={S. {Wang} and Y. {Hong} and R. {Wang} and Q. {Hao} and Y. C. {Wu} and D. W. K. {Ng}
-	title={Edge federated learning via unit-modulus over-the-air computation},
-	booktitle={IEEE Transactions on Communications},
-	year={2022}
-}
+[EFL] S. Wang, Y. Hong, R. Wang, Q. Hao, Y. C. Wu, and D. W. K. Ng, ``Edge federated learning via unit-modulus over-the-air computation,'' IEEE Transactions on Communications, Mar. 2022.
 
+[FLCAV] S. Wang, C. Li, Q. Hao, D. W. K. Ng, Y. C. Eldar, and H. V. Poor, ``Federated learning meets connected autonomous vehicle perception: Principles and implementation,'' submitted to IEEE for possible publication, 2021.
 
-@article{FLCAV2021
-	author={S. {Wang} and C. {Li} and Q. {Hao} and D. W. K. {Ng} and Y. C. {Eldar} and H. V. {Poor},
-	title={Federated learning meets connected autonomous vehicle perception: Principles and implementation},
-	booktitle={submitted to IEEE for possible publication},
-	year={2021}
-}
 ```
 
 ## Dependency
