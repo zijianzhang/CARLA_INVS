@@ -8,11 +8,30 @@
 ## Citation
 
 ```latex
-[INVS] Z. Zhang, S. Wang and Y. Hong and L. Zhou and Q. Hao, ``Distributed dynamic map fusion via federated learning for intelligent networked vehicles,'' IEEE International Conference on Robotics and Automation (ICRA), Xi’an, China, May 2021.
 
-[EFL] S. Wang, Y. Hong, R. Wang, Q. Hao, Y. C. Wu, and D. W. K. Ng, ``Edge federated learning via unit-modulus over-the-air computation,'' IEEE Transactions on Communications, Mar. 2022.
+@inproceedings{INVS,
+  title={Distributed dynamic map fusion via federated learning for intelligent networked vehicles},
+  author={Zhang, Zijian and Wang, Shuai and Hong, Yuncong and Zhou, Liangkai and Hao, Qi},
+  booktitle={Proceedings of the IEEE International Conference on Robotics and Automation (ICRA)},
+  year={2021}
+}
 
-[FLCAV] S. Wang, C. Li, Q. Hao, D. W. K. Ng, Y. C. Eldar, and H. V. Poor, ``Federated learning meets connected autonomous vehicle perception: Principles and implementation,'' submitted to IEEE for possible publication, 2021.
+
+@article{EFL,
+  title={Edge federated learning via unit-modulus over-the-air computation},
+  author={Wang, Shuai and Hong, Yuncong and Wang, Rui and Hao, Qi and Wu, Yik-Chung and Ng, Derrick Wing Kwan},
+  journal={IEEE Transactions on Communications},
+  year={2022},
+  publisher={IEEE}
+}
+
+@article{FLCAV,
+  title={Federated learning meets connected autonomous vehicle perception: Principles and implementation},
+  author={Wang, Shuai and Li, Chengyang and Hao, Qi and Ng, Derrick Wing Kwan and Eldar, Yonina and Poor, Vincent},
+  journal={IEEE Transactions on Communications},
+  year={2021},
+  publisher={IEEE}
+}
 
 ```
 
