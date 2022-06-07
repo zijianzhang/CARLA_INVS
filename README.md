@@ -5,6 +5,12 @@
 
 [TOC]
 
+# News
+
+**INVS 2.0 (i.e., CarlaFLCAV) is now Available !!**
+
+For further information, please follow this repo: https://github.com/SIAT-INVS/CarlaFLCAV
+
 ## Citation
 
 ```latex
