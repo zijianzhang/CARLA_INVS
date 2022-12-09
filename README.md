@@ -30,14 +30,6 @@ For further information, please follow this repo: https://github.com/SIAT-INVS/C
   year={2022},
   publisher={IEEE}
 }
-
-@article{FLCAV,
-  title={Federated deep learning meets autonomous vehicle perception: Design and verification},
-  author={Shuai Wang and Chengyang Li and Qi Hao and Chengzhong Xu and Derrick Wing Kwan Ng and Yonina C. Eldar and H. Vincent Poor},
-  journal={arXiv preprint arXiv:2206.01748},
-  year={2022}
-}
-
 ```
 
 ## Dependency
