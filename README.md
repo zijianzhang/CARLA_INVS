@@ -23,7 +23,7 @@ For further information, please follow this repo: https://github.com/SIAT-INVS/C
 }
 
 
-@article{EFL,
+@article{CarlaFLOTA,
   title={Edge federated learning via unit-modulus over-the-air computation},
   author={Shuai Wang and Yuncong Hong and Rui Wang and Qi Hao and Yik-Chung Wu and Derrick Wing Kwan Ng},
   journal={IEEE Transactions on Communications},
